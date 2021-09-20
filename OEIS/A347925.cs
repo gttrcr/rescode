@@ -1,15 +1,13 @@
-﻿using Wolf; //use https://github.com/gttrcr/ParallelWolf
-
-namespace OEIS
+﻿namespace OEIS
 {
     //driver function
-    //A347924.GenMthGilbreathPolynomial(3);
+    //A347924.GenMthGilbreathPolynomial(3, 10);
 
     class A347925 : A347924
     {
         public static new void GenMthGilbreathPolynomial(int start, int length)
         {
-            CreateOEISSequence(PrimeGCPolynomials(start, length), true).Dispose();
+            CreateOEISSequence(PrimeGCPolynomials(start, length, false), true).Dispose();
         }
     }
 }

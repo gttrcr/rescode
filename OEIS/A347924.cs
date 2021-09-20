@@ -10,7 +10,7 @@ using Wolf; //use https://github.com/gttrcr/ParallelWolf
 namespace OEIS
 {
     //driver function
-    //A347924.GenMthGilbreathPolynomial(3);
+    //A347924.GenMthGilbreathPolynomial(3, 10);
 
     class A347924
     {
@@ -18,51 +18,54 @@ namespace OEIS
 
         public static void GenMthGilbreathPolynomial(int start, int length)
         {
-            CreateOEISSequence(PrimeGCPolynomials(start, length)).Dispose();
+            CreateOEISSequence(PrimeGCPolynomials(start, length, false)).Dispose();
         }
 
-        protected static WolframLink PrimeGCPolynomials(int start, int delta = 1, WolframLink wolf = null)
+        protected static WolframLink PrimeGCPolynomials(int start, int delta = 1, bool output = true, WolframLink wolf = null)
         {
             List<BigInteger> prime = PrimeGen.GeneratePrimes(start + delta);
 
             if (wolf == null)
                 wolf = new WolframLink();
-            return GCPolynomials(prime, start, wolf);
+            return GCPolynomials(prime, start, output, wolf);
         }
 
         private static readonly Mutex writeMutex = new Mutex();
-        private static WolframLink GCPolynomials(List<BigInteger> seq, int start, WolframLink wolf = null)
+        private static WolframLink GCPolynomials(List<BigInteger> seq, int start, bool output = false, WolframLink wolf = null)
         {
             if (wolf == null)
                 wolf = new WolframLink();
 
             if (Directory.Exists(folder))
                 Directory.Delete(folder, true);
-            Console.SetBufferSize(9999, 100);
+            if (output)
+                Console.SetBufferSize(9999, 100);
             Parallel.For(start, seq.Count, new ParallelOptions() { MaxDegreeOfParallelism = 8 }, (int i) =>
             {
                 int terms = i;
                 double percentage = 0;
                 List<BigInteger> max = GC.MaxK(seq.GetRange(0, i), terms + 3, () =>
                 {
-                    writeMutex.WaitOne();
-                    Console.SetCursorPosition(0, i - start);
-                    Console.WriteLine((int)(100 * (++percentage / (terms + 3))));
-                    writeMutex.ReleaseMutex();
+                    if (output)
+                    {
+                        writeMutex.WaitOne();
+                        Console.SetCursorPosition(0, i - start);
+                        Console.WriteLine((int)(100 * (++percentage / (terms + 3))));
+                        writeMutex.ReleaseMutex();
+                    }
                 });
 
                 string str = string.Join(",", max.Select(x => x.ToString()));
                 str = "t:={" + str + "};res:=Table[t[[n]]-2^(n+" + (i - 1).ToString() + "),{n,1,Length[t]}];FindSequenceFunction[res,n]";
                 str = wolf.Wolf(str);
 
-                writeMutex.WaitOne();
                 string path = folder + i.ToString() + ".txt";
                 Directory.CreateDirectory(Path.GetDirectoryName(path));
                 File.WriteAllText(path, str);
-                writeMutex.ReleaseMutex();
             });
 
-            Console.SetCursorPosition(0, seq.Count - start);
+            if (output)
+                Console.SetCursorPosition(0, seq.Count - start);
 
             return wolf;
         }
@@ -96,6 +99,8 @@ namespace OEIS
             string res = "";
             sequence.ForEach(x => res += x.Item1 + " " + x.Item2 + Environment.NewLine);
             Console.WriteLine(res);
+            Console.WriteLine();
+            Console.WriteLine(string.Join(", ", sequence.Select(x => x.Item2)));
             //File.WriteAllText("..\\..\\b347360.txt", res);
 
             return wolf;
