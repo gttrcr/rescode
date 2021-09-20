@@ -4,7 +4,7 @@
     {
         static void Main(string[] args)
         {
-            A347360.GenMthGilbreathPolynomial(3);
+            //A347925.GenMthGilbreathPolynomial(3, 10);
         }
     }
 }

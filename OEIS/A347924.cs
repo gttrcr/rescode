@@ -16,15 +16,18 @@ namespace OEIS
     {
         private static readonly string folder = "gilbreath_polynomials\\";
 
-        public static WolframLink GenMthGilbreathPolynomial(int m)
+        public static void GenMthGilbreathPolynomial(int start, int length)
         {
-            return CreateOEISSequence(PrimeGCPolynomials(m));
+            CreateOEISSequence(PrimeGCPolynomials(start, length)).Dispose();
         }
 
-        protected static WolframLink PrimeGCPolynomials(int start, int delta = 1)
+        protected static WolframLink PrimeGCPolynomials(int start, int delta = 1, WolframLink wolf = null)
         {
             List<BigInteger> prime = PrimeGen.GeneratePrimes(start + delta);
-            return GCPolynomials(prime, start);
+
+            if (wolf == null)
+                wolf = new WolframLink();
+            return GCPolynomials(prime, start, wolf);
         }
 
         private static readonly Mutex writeMutex = new Mutex();

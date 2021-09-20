@@ -4,12 +4,12 @@ namespace OEIS
 {
     //driver function
     //A347924.GenMthGilbreathPolynomial(3);
-    
+
     class A347925 : A347924
     {
-        public static new WolframLink GenMthGilbreathPolynomial(int m)
+        public static new void GenMthGilbreathPolynomial(int start, int length)
         {
-            return CreateOEISSequence(PrimeGCPolynomials(m), true);
+            CreateOEISSequence(PrimeGCPolynomials(start, length), true).Dispose();
         }
     }
 }
