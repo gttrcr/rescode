@@ -48,6 +48,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="A347360.cs" />
+    <Compile Include="A347924.cs" />
+    <Compile Include="A347925.cs" />
     <Compile Include="GC.cs" />
     <Compile Include="PrimeGen.cs" />
     <Compile Include="Program.cs" />
