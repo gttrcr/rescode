@@ -9,6 +9,9 @@ using Wolf; //use https://github.com/gttrcr/ParallelWolf
 
 namespace OEIS
 {
+    //driver function
+    //A347360.GenMthGilbreathPolynomial(3);
+    
     class A347360
     {
         private static readonly string folder = "gilbreath_polynomials\\";
