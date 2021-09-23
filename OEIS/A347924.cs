@@ -14,7 +14,7 @@ namespace OEIS
 
     class A347924
     {
-        private static readonly string folder = "gilbreath_polynomials\\";
+        protected static string folder = "A347924\\";
 
         public static void GenMthGilbreathPolynomial(int start, int length)
         {

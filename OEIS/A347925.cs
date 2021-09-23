@@ -7,6 +7,7 @@
     {
         public static new void GenMthGilbreathPolynomial(int start, int length)
         {
+            folder = "A347925\\";
             CreateOEISSequence(PrimeGCPolynomials(start, length, false), true).Dispose();
         }
     }
