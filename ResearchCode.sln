@@ -5,6 +5,18 @@ VisualStudioVersion = 16.0.31624.102
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OEIS", "OEIS\OEIS.csproj", "{9AFB2DA3-DE00-4CA7-B462-2BAF67B7E0A3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LightMeter", "LightMeter\LightMeter\LightMeter.csproj", "{F2C8FBD6-036B-41C0-AB28-16B50D9FF44E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D30DA439-B345-4855-9352-0762952B3D0D} = {D30DA439-B345-4855-9352-0762952B3D0D}
+		{0D2E4A5B-EFFD-46DF-B69E-520081612BC1} = {0D2E4A5B-EFFD-46DF-B69E-520081612BC1}
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LightMeter", "LightMeter", "{98D1FB6D-693C-4B84-86CA-27D4CAEEDFF1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Driver", "LightMeter\Driver\Driver.csproj", "{0D2E4A5B-EFFD-46DF-B69E-520081612BC1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LightAnalyzer", "LightMeter\LightAnalyzer\LightAnalyzer.csproj", "{D30DA439-B345-4855-9352-0762952B3D0D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,9 +27,26 @@ Global
 		{9AFB2DA3-DE00-4CA7-B462-2BAF67B7E0A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9AFB2DA3-DE00-4CA7-B462-2BAF67B7E0A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9AFB2DA3-DE00-4CA7-B462-2BAF67B7E0A3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F2C8FBD6-036B-41C0-AB28-16B50D9FF44E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2C8FBD6-036B-41C0-AB28-16B50D9FF44E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2C8FBD6-036B-41C0-AB28-16B50D9FF44E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2C8FBD6-036B-41C0-AB28-16B50D9FF44E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D2E4A5B-EFFD-46DF-B69E-520081612BC1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D2E4A5B-EFFD-46DF-B69E-520081612BC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D2E4A5B-EFFD-46DF-B69E-520081612BC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D2E4A5B-EFFD-46DF-B69E-520081612BC1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D30DA439-B345-4855-9352-0762952B3D0D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D30DA439-B345-4855-9352-0762952B3D0D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D30DA439-B345-4855-9352-0762952B3D0D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D30DA439-B345-4855-9352-0762952B3D0D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{F2C8FBD6-036B-41C0-AB28-16B50D9FF44E} = {98D1FB6D-693C-4B84-86CA-27D4CAEEDFF1}
+		{0D2E4A5B-EFFD-46DF-B69E-520081612BC1} = {98D1FB6D-693C-4B84-86CA-27D4CAEEDFF1}
+		{D30DA439-B345-4855-9352-0762952B3D0D} = {98D1FB6D-693C-4B84-86CA-27D4CAEEDFF1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {CFBB57D6-DCB9-4AD3-A27C-4DCEAD9A860E}
