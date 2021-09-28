@@ -14,3 +14,7 @@
 /LightMeter/LightMeter/obj
 /LightMeter/packages
 /packages
+/LightMeter/Driver/bin/Release
+/LightMeter/LightAnalyzer/bin/Release
+/LightMeter/LightAnalyzer/obj/Release
+/LightMeter/LightMeter/bin/Release

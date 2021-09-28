@@ -5,14 +5,14 @@ using System.Runtime.InteropServices;
 using System.Drawing;
 using System.Threading;
 using System.Runtime.Serialization;
+using System.IO;
 
 namespace Driver
 {
     public class ASICameraDll2Driver : IDriver
     {
         private Dictionary<string, int> _nameIdDictionary;
-        //private bool _isRunning = false;
-        Thread _thread;
+        private bool _isRunning = false;
 
         public List<string> SearchDevices()
         {
@@ -46,33 +46,39 @@ namespace Driver
 
         public void Start(object id, Action<object, Bitmap> newFrameCallback)
         {
-            ThreadStart threadStart = new ThreadStart(delegate
-            {
-                while(true)
-                {
-                    Thread.Sleep(100);
+            //ThreadStart threadStart = new ThreadStart(delegate
+            //{
+            //    while(true)
+            //    {
+            //        Thread.Sleep(100);
 
                     //List<ASICameraDll2.ASI_CAMERA_INFO> listOfAsi = SearchDevices().ConvertAll(x => (ASICameraDll2.ASI_CAMERA_INFO)x).ToList();
 
-                    //int number = ASICameraDll2.ASIGetNumOfConnectedCameras();
-                    //ASICameraDll2.ASIGetCameraProperty(out ASICameraDll2.ASI_CAMERA_INFO aSI_CAMERA_INFO, 0);
-                    //ASICameraDll2.ASI_ERROR_CODE error = ASICameraDll2.ASIOpenCamera(0);
-                    //error = ASICameraDll2.ASIInitCamera(0);
-                    //error = ASICameraDll2.ASISetROIFormat(0, 1280, 960, 1, ASICameraDll2.ASI_IMG_TYPE.ASI_IMG_RGB24);
-                    //error = ASICameraDll2.ASISetStartPos(0, 0, 0);
-                    //error = ASICameraDll2.ASISetControlValue(0, ASICameraDll2.ASI_CONTROL_TYPE.ASI_EXPOSURE, 100000);
-                    //error = ASICameraDll2.ASIStartExposure(0, ASICameraDll2.ASI_BOOL.ASI_FALSE);
-                    //ASICameraDll2.ASIGetExpStatus(0, out ASICameraDll2.ASI_EXPOSURE_STATUS pExpStatus);
-                    ////error = ASICameraDll2.ASIStopExposure(0);
-                    //IntPtr pBuffer = Marshal.AllocHGlobal(1280 * 960);
-                    //ASICameraDll2.ASIGetDataAfterExp(1, pBuffer, 1280 * 960);
+                    int number = ASICameraDll2.ASIGetNumOfConnectedCameras();
+                    ASICameraDll2.ASIGetCameraProperty(out ASICameraDll2.ASI_CAMERA_INFO aSI_CAMERA_INFO, 0);
+                    ASICameraDll2.ASI_ERROR_CODE error = ASICameraDll2.ASIOpenCamera(0);
+                    error = ASICameraDll2.ASIInitCamera(0);
+                    error = ASICameraDll2.ASISetROIFormat(0, 1280, 960, 1, ASICameraDll2.ASI_IMG_TYPE.ASI_IMG_RGB24);
+                    error = ASICameraDll2.ASISetStartPos(0, 0, 0);
+                    error = ASICameraDll2.ASISetControlValue(0, ASICameraDll2.ASI_CONTROL_TYPE.ASI_EXPOSURE, 100000);
+                    error = ASICameraDll2.ASIStartExposure(0, ASICameraDll2.ASI_BOOL.ASI_FALSE);
+                    ASICameraDll2.ASIGetExpStatus(0, out ASICameraDll2.ASI_EXPOSURE_STATUS pExpStatus);
+                    //error = ASICameraDll2.ASIStopExposure(0);
+                    IntPtr pBuffer = Marshal.AllocHGlobal(1280 * 960);
+                    ASICameraDll2.ASIGetDataAfterExp(1, pBuffer, 1280 * 960);
+                    byte[] managedArray = new byte[1280 * 960];
+                    Marshal.Copy(pBuffer, managedArray, 0, 1280 * 960);
+                    using (var ms = new MemoryStream(managedArray))
+                    {
+                        Image image= Image.FromStream(ms);
+                    }
 
                     Bitmap bitmap = null;
                     newFrameCallback.Invoke(this, bitmap);
-                }
-            });
-            _thread = new Thread(threadStart);
-            _thread.Start();
+            //    }
+            //});
+            //_thread = new Thread(threadStart);
+            //_thread.Start();
             //_isRunning = true;
             
             //throw new NotImplementedException();
@@ -80,12 +86,11 @@ namespace Driver
 
         public bool IsRunning()
         {
-            return _thread.IsAlive;
+            return _isRunning;
         }
 
         public void Stop()
         {
-            _thread.Abort();
             ASICameraDll2.ASIStopExposure(0);
             ASICameraDll2.ASICloseCamera(0);
         }

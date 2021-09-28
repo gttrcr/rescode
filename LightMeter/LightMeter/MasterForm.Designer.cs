@@ -49,6 +49,7 @@
             this.chartRGBToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.logToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.linearToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.rGBHistogramToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.lightnessIntensityToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
@@ -59,10 +60,7 @@
             this.pictureBoxCrop = new System.Windows.Forms.PictureBox();
             this.splitContainer5 = new System.Windows.Forms.SplitContainer();
             this.splitContainer6 = new System.Windows.Forms.SplitContainer();
-            this.splitContainer7 = new System.Windows.Forms.SplitContainer();
-            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.splitContainer3 = new System.Windows.Forms.SplitContainer();
-            this.rGBHistogramToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).BeginInit();
             this.splitContainer2.Panel1.SuspendLayout();
@@ -81,12 +79,8 @@
             this.splitContainer5.Panel2.SuspendLayout();
             this.splitContainer5.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer6)).BeginInit();
-            this.splitContainer6.Panel1.SuspendLayout();
             this.splitContainer6.Panel2.SuspendLayout();
             this.splitContainer6.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer7)).BeginInit();
-            this.splitContainer7.Panel2.SuspendLayout();
-            this.splitContainer7.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer3)).BeginInit();
             this.splitContainer3.SuspendLayout();
             this.SuspendLayout();
@@ -124,7 +118,7 @@
             this.filterInfoToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripComboBoxDevices});
             this.filterInfoToolStripMenuItem.Name = "filterInfoToolStripMenuItem";
-            this.filterInfoToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.filterInfoToolStripMenuItem.Size = new System.Drawing.Size(198, 26);
             this.filterInfoToolStripMenuItem.Text = "Filter Info";
             // 
             // toolStripComboBoxDevices
@@ -135,21 +129,21 @@
             // closeCamToolStripMenuItem
             // 
             this.closeCamToolStripMenuItem.Name = "closeCamToolStripMenuItem";
-            this.closeCamToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.closeCamToolStripMenuItem.Size = new System.Drawing.Size(198, 26);
             this.closeCamToolStripMenuItem.Text = "Close Cam";
             this.closeCamToolStripMenuItem.Click += new System.EventHandler(this.CloseCamToolStripMenuItem_Click);
             // 
             // saveThePictureToolStripMenuItem
             // 
             this.saveThePictureToolStripMenuItem.Name = "saveThePictureToolStripMenuItem";
-            this.saveThePictureToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.saveThePictureToolStripMenuItem.Size = new System.Drawing.Size(198, 26);
             this.saveThePictureToolStripMenuItem.Text = "Save the picture";
             this.saveThePictureToolStripMenuItem.Click += new System.EventHandler(this.SaveThePictureToolStripMenuItem_Click);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(198, 26);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.ExitToolStripMenuItem_Click);
             // 
@@ -165,7 +159,7 @@
             // newCalibrationToolStripMenuItem
             // 
             this.newCalibrationToolStripMenuItem.Name = "newCalibrationToolStripMenuItem";
-            this.newCalibrationToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.newCalibrationToolStripMenuItem.Size = new System.Drawing.Size(200, 26);
             this.newCalibrationToolStripMenuItem.Text = "New calibration";
             this.newCalibrationToolStripMenuItem.Click += new System.EventHandler(this.StartCalibrationToolStripMenuItem_Click);
             // 
@@ -174,7 +168,7 @@
             this.loadCalibrationToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripComboBoxCalibrations});
             this.loadCalibrationToolStripMenuItem.Name = "loadCalibrationToolStripMenuItem";
-            this.loadCalibrationToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.loadCalibrationToolStripMenuItem.Size = new System.Drawing.Size(200, 26);
             this.loadCalibrationToolStripMenuItem.Text = "Load calibration";
             // 
             // toolStripComboBoxCalibrations
@@ -202,7 +196,6 @@
             // 
             // toolStripTextBoxRefresh
             // 
-            this.toolStripTextBoxRefresh.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.toolStripTextBoxRefresh.Name = "toolStripTextBoxRefresh";
             this.toolStripTextBoxRefresh.Size = new System.Drawing.Size(100, 27);
             // 
@@ -252,6 +245,13 @@
             this.linearToolStripMenuItem.Name = "linearToolStripMenuItem";
             this.linearToolStripMenuItem.Size = new System.Drawing.Size(132, 26);
             this.linearToolStripMenuItem.Text = "Linear";
+            // 
+            // rGBHistogramToolStripMenuItem
+            // 
+            this.rGBHistogramToolStripMenuItem.Name = "rGBHistogramToolStripMenuItem";
+            this.rGBHistogramToolStripMenuItem.Size = new System.Drawing.Size(151, 24);
+            this.rGBHistogramToolStripMenuItem.Tag = "1";
+            this.rGBHistogramToolStripMenuItem.Text = "RGB histogram OFF";
             // 
             // dataToolStripMenuItem
             // 
@@ -374,39 +374,12 @@
             this.splitContainer6.Name = "splitContainer6";
             this.splitContainer6.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
-            // splitContainer6.Panel1
-            // 
-            this.splitContainer6.Panel1.Controls.Add(this.splitContainer7);
-            // 
             // splitContainer6.Panel2
             // 
             this.splitContainer6.Panel2.Controls.Add(this.splitContainer3);
             this.splitContainer6.Size = new System.Drawing.Size(475, 446);
             this.splitContainer6.SplitterDistance = 216;
             this.splitContainer6.TabIndex = 0;
-            // 
-            // splitContainer7
-            // 
-            this.splitContainer7.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.splitContainer7.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer7.Location = new System.Drawing.Point(0, 0);
-            this.splitContainer7.Name = "splitContainer7";
-            // 
-            // splitContainer7.Panel2
-            // 
-            this.splitContainer7.Panel2.Controls.Add(this.richTextBox1);
-            this.splitContainer7.Size = new System.Drawing.Size(475, 216);
-            this.splitContainer7.SplitterDistance = 386;
-            this.splitContainer7.TabIndex = 0;
-            // 
-            // richTextBox1
-            // 
-            this.richTextBox1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.richTextBox1.Location = new System.Drawing.Point(0, 0);
-            this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.Size = new System.Drawing.Size(81, 212);
-            this.richTextBox1.TabIndex = 1;
-            this.richTextBox1.Text = "";
             // 
             // splitContainer3
             // 
@@ -417,13 +390,6 @@
             this.splitContainer3.Size = new System.Drawing.Size(475, 226);
             this.splitContainer3.SplitterDistance = 227;
             this.splitContainer3.TabIndex = 0;
-            // 
-            // rGBHistogramToolStripMenuItem
-            // 
-            this.rGBHistogramToolStripMenuItem.Name = "rGBHistogramToolStripMenuItem";
-            this.rGBHistogramToolStripMenuItem.Size = new System.Drawing.Size(151, 24);
-            this.rGBHistogramToolStripMenuItem.Tag = "1";
-            this.rGBHistogramToolStripMenuItem.Text = "RGB histogram OFF";
             // 
             // MasterForm
             // 
@@ -456,13 +422,9 @@
             this.splitContainer5.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer5)).EndInit();
             this.splitContainer5.ResumeLayout(false);
-            this.splitContainer6.Panel1.ResumeLayout(false);
             this.splitContainer6.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer6)).EndInit();
             this.splitContainer6.ResumeLayout(false);
-            this.splitContainer7.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer7)).EndInit();
-            this.splitContainer7.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer3)).EndInit();
             this.splitContainer3.ResumeLayout(false);
             this.ResumeLayout(false);
@@ -501,8 +463,6 @@
         private System.Windows.Forms.SplitContainer splitContainer5;
         private System.Windows.Forms.SplitContainer splitContainer6;
         private System.Windows.Forms.SplitContainer splitContainer3;
-        private System.Windows.Forms.SplitContainer splitContainer7;
-        private System.Windows.Forms.RichTextBox richTextBox1;
         private System.Windows.Forms.TextBox textBoxLength;
         private System.Windows.Forms.ToolStripMenuItem lightnessIntensityToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem rGBHistogramToolStripMenuItem;

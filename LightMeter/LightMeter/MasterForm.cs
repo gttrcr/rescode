@@ -45,7 +45,7 @@ namespace WebcamLightMeter
             _devices = new Dictionary<string, IDriver>();
             _driverList = new List<IDriver>();
             _driverList.Add(new GenericWebcamDriver());
-            _driverList.Add(new ASICameraDll2Driver());
+            //_driverList.Add(new ASICameraDll2Driver());
 
             for (int i = 0; i < _driverList.Count; i++)
             {
@@ -106,7 +106,6 @@ namespace WebcamLightMeter
                 _chartLightness.Clear();
                 _chartXLine.Clear();
                 _chartYLine.Clear();
-                richTextBox1.Clear();
                 pictureBoxStream.Image = null;
                 pictureBoxStream.Invalidate();
                 pictureBoxCrop.Image = null;
@@ -295,7 +294,6 @@ namespace WebcamLightMeter
             splitContainer4.SplitterDistance = 2 * splitContainer4.ClientSize.Width / 3;
             splitContainer5.SplitterDistance = splitContainer5.ClientSize.Height / 3;
             splitContainer6.SplitterDistance = splitContainer6.ClientSize.Height / 2;
-            splitContainer7.SplitterDistance = 3 * splitContainer7.ClientSize.Width / 4;
             pictureBoxStream.Click += PictureBoxStream_Click;
 
             toolStripTextBoxRefresh.Text = "500";
@@ -425,10 +423,8 @@ namespace WebcamLightMeter
                     input.Add(_lightnessDataSet);
                     _chartLightness.Values = input;
                     _chartLightness.Draw();
-                    splitContainer7.Panel1.Controls.Clear();
-                    splitContainer7.Panel1.Controls.Add(_chartLightness);
-
-                    richTextBox1.Text = Utils.BeaufityStringOutput(Analyzer.MeasureLightProperties(_lightnessDataSet.Last()), "VALUES");
+                    splitContainer6.Panel1.Controls.Clear();
+                    splitContainer6.Panel1.Controls.Add(_chartLightness);
                 }
             };
             _chartRefresh.Start();
