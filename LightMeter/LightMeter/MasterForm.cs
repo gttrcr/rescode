@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Windows.Forms;
 using Point = Accord.Point;
 using Timer = System.Windows.Forms.Timer;
@@ -20,21 +21,19 @@ namespace WebcamLightMeter
         private Chart _chartYLine;
         private List<double> _lightnessDataSet;
         private Dictionary<char, List<int>> _histograms;
-        private Bitmap _bitmap;
 
         private List<IDriver> _driverList;
         private Dictionary<string, IDriver> _devices;
-        private int _gaussRefreshTime = 0;
+        private int _cropRefreshTime = 0;
         private double _gaussSize = 0;
         private Timer _chartRefresh;
-        private Timer _gaussTimer;
+        private Timer _cropTimer;
         private Point _gaussPosition;
         private bool _acquireData;
         private Dictionary<string, List<Tuple<string, double>>> _data;
         private string _directoryForSavingData;
         private Point _snapStart = new Point();
-
-        private double m_each_px = 0;
+        private double _m_each_px = 0;
 
         public MasterForm()
         {
@@ -54,7 +53,7 @@ namespace WebcamLightMeter
                 if (driver.GetType() == typeof(GenericWebcamDriver))
                 {
                     List<string> genericDevices = driver.SearchDevices();
-                    toolStripComboBox1.Items.AddRange(genericDevices.ToArray());
+                    toolStripComboBoxDevices.Items.AddRange(genericDevices.ToArray());
 
                     for (int d = 0; d < genericDevices.Count; d++)
                         _devices.Add(genericDevices[d], _driverList[i]);
@@ -62,7 +61,7 @@ namespace WebcamLightMeter
                 else if (driver.GetType() == typeof(ASICameraDll2Driver))
                 {
                     List<string> listOfAsi = driver.SearchDevices();
-                    toolStripComboBox1.Items.AddRange(listOfAsi.ToArray());
+                    toolStripComboBoxDevices.Items.AddRange(listOfAsi.ToArray());
 
                     for (int d = 0; d < listOfAsi.Count; d++)
                         _devices.Add(listOfAsi[d], _driverList[i]);
@@ -72,40 +71,215 @@ namespace WebcamLightMeter
             ControlsEventAndBehaviour();
         }
 
+        private void MasterForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (toolStripComboBoxDevices.SelectedItem != null)
+            {
+                if (_devices[toolStripComboBoxDevices.SelectedItem.ToString()] == null)
+                {
+                    Application.Exit();
+                    return;
+                }
+
+                if (_devices[toolStripComboBoxDevices.SelectedItem.ToString()] != null && _devices[toolStripComboBoxDevices.SelectedItem.ToString()].IsRunning())
+                {
+                    _devices[toolStripComboBoxDevices.SelectedItem.ToString()].Stop();
+                    _chartRefresh?.Stop();
+                    _cropTimer?.Stop();
+                    Application.Exit();
+                    return;
+                }
+            }
+
+            Application.Exit();
+            return;
+        }
+
+        private void CloseCamToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (toolStripComboBoxDevices.SelectedItem != null && _devices[toolStripComboBoxDevices.SelectedItem.ToString()].IsRunning())
+            {
+                _devices[toolStripComboBoxDevices.SelectedItem.ToString()].Stop();
+                _chartRefresh?.Stop();
+                _cropTimer?.Stop();
+                _chartRGB.Clear();
+                _chartLightness.Clear();
+                _chartXLine.Clear();
+                _chartYLine.Clear();
+                richTextBox1.Clear();
+                pictureBoxStream.Image = null;
+                pictureBoxStream.Invalidate();
+                pictureBoxCrop.Image = null;
+                pictureBoxCrop.Invalidate();
+                Refresh();
+            }
+        }
+
+        private void SaveThePictureToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (pictureBoxStream.Image != null)
+            {
+                SaveFileDialog saveFileDialog = new SaveFileDialog();
+                saveFileDialog.Filter = "Bitmap Image (.bmp)|*.bmp|Gif Image (.gif)|*.gif|JPEG Image (.jpeg)|*.jpeg|Png Image (.png)|*.png|Tiff Image (.tiff)|*.tiff|Wmf Image (.wmf)|*.wmf";
+                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                    pictureBoxStream.Image.Save(saveFileDialog.FileName);
+                else
+                    MessageBox.Show("Error during save the photo", "WebcamLightMeter", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void PictureBoxStream_Click(object sender, EventArgs e)
+        {
+            if (pictureBoxStream.Image == null)
+                return;
+
+            //Calculate the position on bitmap
+            float x0 = 0;
+            float y0 = 0;
+            float bitmapW = pictureBoxStream.Width;
+            float bitmapH = pictureBoxStream.Height;
+            if (pictureBoxStream.Width / (float)pictureBoxStream.Height < pictureBoxStream.Image.Width / (float)pictureBoxStream.Image.Height)
+            {
+                bitmapW = pictureBoxStream.Width;
+                bitmapH = bitmapW * pictureBoxStream.Image.Height / pictureBoxStream.Image.Width;
+                y0 = (float)(pictureBoxStream.Height - bitmapH) / 2;
+            }
+            else if (pictureBoxStream.Width / (float)pictureBoxStream.Height > pictureBoxStream.Image.Width / (float)pictureBoxStream.Image.Height)
+            {
+                bitmapH = pictureBoxStream.Height;
+                bitmapW = bitmapH * pictureBoxStream.Image.Width / pictureBoxStream.Image.Height;
+                x0 = (float)(pictureBoxStream.Width - bitmapW) / 2;
+            }
+
+            float x = ((MouseEventArgs)e).Location.X - x0;
+            float y = ((MouseEventArgs)e).Location.Y - y0;
+
+            //Real coordinate in image
+            x *= pictureBoxStream.Image.Width / bitmapW;
+            y *= pictureBoxStream.Image.Height / bitmapH;
+
+            _gaussPosition = new Point((int)x, (int)y);
+            ChangeTimerGaussParameters((int)x, (int)y);
+        }
+
+        private void DataToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (dataToolStripMenuItem.Text == "Start acquire data")
+            {
+                FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog();
+                if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
+                {
+                    _directoryForSavingData = folderBrowserDialog.SelectedPath;
+                    dataToolStripMenuItem.Text = "Stop acquire data";
+
+                    _acquireData = true;
+                    _data = new Dictionary<string, List<Tuple<string, double>>>();
+                }
+            }
+            else if (dataToolStripMenuItem.Text == "Stop acquire data")
+            {
+                _acquireData = false;
+                dataToolStripMenuItem.Text = "Saving...";
+
+                for (int k = 0; k < _data.Keys.Count; k++)
+                {
+                    string strData = "";
+                    for (int i = 0; i < _data[_data.Keys.ElementAt(k)].Count; i++)
+                        strData += _data[_data.Keys.ElementAt(k)][i].Item1 + "#" + _data[_data.Keys.ElementAt(k)][i].Item2 + Environment.NewLine;
+
+                    File.WriteAllText(_directoryForSavingData + "\\" + _data.Keys.ElementAt(k) + ".txt", strData);
+                }
+
+                dataToolStripMenuItem.Text = "Start acquire data";
+            }
+        }
+
+        private void StartCalibrationToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CalibrationForm calibrationForm = new CalibrationForm(pictureBoxStream, toolStripComboBoxCalibrations);
+            calibrationForm.Show();
+        }
+
+        private void ExitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MasterForm_FormClosing(null, null);
+        }
+
+        private void ChangeTimerGaussParameters(float x, float y)
+        {
+            _cropTimer?.Stop();
+            _cropTimer?.Dispose();
+            _cropTimer = new Timer();
+            _cropTimer.Interval = _cropRefreshTime;
+            _cropTimer.Tick += (s, ea) =>
+            {   
+                //Refresh crop
+                Bitmap cropImage = new Bitmap(pictureBoxStream.Image);
+                Rectangle rect = new Rectangle((int)((x - _gaussSize / 2) < 0 ? 0 : (x - _gaussSize / 2)), (int)((y - _gaussSize / 2) < 0 ? 0 : (y - _gaussSize / 2)), (int)_gaussSize, (int)_gaussSize);
+                if (rect.X + rect.Width > pictureBoxStream.Image.Width || rect.Y + rect.Height > pictureBoxStream.Image.Height)
+                {
+                    rect.Width = Math.Min(pictureBoxStream.Image.Width - rect.X, pictureBoxStream.Image.Height - rect.Y);
+                    rect.Height = rect.Width;
+                    _gaussSize = rect.Height;
+                }
+                cropImage = cropImage.Clone(rect, cropImage.PixelFormat);
+                pictureBoxCrop.Image = cropImage;
+            };
+            _cropTimer.Start();
+        }
+
+        private void DelegateMethodDriver(object obj1, Bitmap obj2)
+        {
+            pictureBoxStream.Image = obj2;
+            _histograms = Analyzer.GetHistogramAndLightness((Bitmap)pictureBoxStream.Image, out double lightness);
+            
+            _lightnessDataSet.Add(lightness);
+            if (_lightnessDataSet.Count > 300)
+                _lightnessDataSet.RemoveAt(0);
+
+            if (_acquireData)
+            {
+                Utils.AddOrUpdateDictionary(ref _data, "Lightness", lightness);
+                Utils.AddOrUpdateDictionary(ref _data, "MaxR", _histograms['R'].Max());
+                Utils.AddOrUpdateDictionary(ref _data, "MaxG", _histograms['G'].Max());
+                Utils.AddOrUpdateDictionary(ref _data, "MaxB", _histograms['B'].Max());
+            }
+        }
+
         private void ControlsEventAndBehaviour()
         {
             WindowState = FormWindowState.Maximized;
             StartPosition = FormStartPosition.CenterScreen;
 
-            toolStripComboBox1.SelectedIndexChanged += (sender, e) =>
+            toolStripComboBoxDevices.SelectedIndexChanged += (sender, e) =>
             {
                 CloseCamToolStripMenuItem_Click(null, null);
-                _devices[toolStripComboBox1.SelectedItem.ToString()].Start(((ToolStripComboBox)sender).SelectedItem, DelegateMethodDriver);
+                _devices[toolStripComboBoxDevices.SelectedItem.ToString()].Start(((ToolStripComboBox)sender).SelectedItem, DelegateMethodDriver);
                 fileToolStripMenuItem.HideDropDown();
                 _chartRefresh.Start();
             };
 
-            toolStripTextBox2.KeyDown += (sender, e) =>
+            toolStripTextBoxRefresh.KeyDown += (sender, e) =>
             {
                 if (e.KeyCode == Keys.Enter)
                 {
-                    if (int.TryParse(toolStripTextBox2.Text, out int val))
+                    if (int.TryParse(toolStripTextBoxRefresh.Text, out int val))
                     {
-                        if (_gaussTimer != null)
-                            _gaussTimer.Interval = val;
+                        if (_cropTimer != null)
+                            _cropTimer.Interval = val;
                         streamToolStripMenuItem.HideDropDown();
-                        _gaussRefreshTime = val;
+                        _cropRefreshTime = val;
                     }
                     else
                         MessageBox.Show("Cannot parse value from refresh time", "WebcamLightMeter", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             };
 
-            toolStripTextBox3.KeyDown += (sender, e) =>
+            toolStripTextBoxSize.KeyDown += (sender, e) =>
             {
                 if (e.KeyCode == Keys.Enter)
                 {
-                    if (double.TryParse(toolStripTextBox3.Text, out double val))
+                    if (double.TryParse(toolStripTextBoxSize.Text, out double val))
                     {
                         _gaussSize = val;
                         streamToolStripMenuItem.HideDropDown();
@@ -124,12 +298,12 @@ namespace WebcamLightMeter
             splitContainer7.SplitterDistance = 3 * splitContainer7.ClientSize.Width / 4;
             pictureBoxStream.Click += PictureBoxStream_Click;
 
-            toolStripTextBox2.Text = "500";
-            toolStripTextBox3.Text = "200";
-            _gaussRefreshTime = 500;
+            toolStripTextBoxRefresh.Text = "500";
+            toolStripTextBoxSize.Text = "200";
+            _cropRefreshTime = 500;
             _gaussSize = 200;
 
-            toolStripComboBox2.SelectedIndexChanged += (sender, e) =>
+            toolStripComboBoxCalibrations.SelectedIndexChanged += (sender, e) =>
             {
                 string calibrationName = ((ToolStripComboBox)sender).SelectedItem.ToString();
                 if (calibrationName == NameAndDefine.defaultCalibrationName)
@@ -156,19 +330,19 @@ namespace WebcamLightMeter
                 calibrationToolStripMenuItem.HideDropDown();
             };
 
-            toolStripComboBox2.Items.Clear();
-            toolStripComboBox2.Items.Add(NameAndDefine.defaultCalibrationName);
+            toolStripComboBoxCalibrations.Items.Clear();
+            toolStripComboBoxCalibrations.Items.Add(NameAndDefine.defaultCalibrationName);
             if (File.Exists(NameAndDefine.calibrationFile))
             {
                 string[] cals = File.ReadAllLines(NameAndDefine.calibrationFile);
                 List<string[]> calsComplete = cals.Select(x => x.Split('#')).ToList();
-                toolStripComboBox2.Items.Clear();
-                toolStripComboBox2.Items.Add(NameAndDefine.defaultCalibrationName);
+                toolStripComboBoxCalibrations.Items.Clear();
+                toolStripComboBoxCalibrations.Items.Add(NameAndDefine.defaultCalibrationName);
                 for (int i = 0; i < calsComplete.Count; i++)
-                    toolStripComboBox2.Items.Add(calsComplete[i][0]);
+                    toolStripComboBoxCalibrations.Items.Add(calsComplete[i][0]);
             }
 
-            toolStripComboBox2.SelectedIndex = 0;
+            toolStripComboBoxCalibrations.SelectedIndex = 0;
 
             _chartRGB = new Chart(splitContainer5.Panel1.ClientSize.Width, splitContainer5.Panel1.ClientSize.Height)
             {
@@ -228,10 +402,10 @@ namespace WebcamLightMeter
             linearToolStripMenuItem.PerformClick();
 
             _chartRefresh = new Timer();
-            _chartRefresh.Interval = 100;
+            _chartRefresh.Interval = 200;
             _chartRefresh.Tick += (sender, e) =>
             {
-                if (_histograms != null)
+                if (_histograms != null && rGBHistogramToolStripMenuItem.Tag.ToString() == "1")
                 {
                     _chartRGB.Clear();
                     List<List<double>> input = new List<List<double>>();
@@ -244,7 +418,7 @@ namespace WebcamLightMeter
                     splitContainer5.Panel1.Controls.Add(_chartRGB);
                 }
 
-                if (_lightnessDataSet != null && _lightnessDataSet.Count != 0)
+                if (_lightnessDataSet != null && _lightnessDataSet.Count != 0 && lightnessIntensityToolStripMenuItem.Tag.ToString() == "1")
                 {
                     _chartLightness.Clear();
                     List<List<double>> input = new List<List<double>>();
@@ -259,10 +433,9 @@ namespace WebcamLightMeter
             };
             _chartRefresh.Start();
 
-            //with mouse left key set the scale
-            //with mouse right key measure
-            pictureBoxSnap.MouseDown += (sender, e) => _snapStart = new Point(e.Location.X, e.Location.Y);
-            pictureBoxSnap.MouseUp += (sender, e) =>
+            //with mouse left key set the scale, with mouse right key measure
+            pictureBoxCrop.MouseDown += (sender, e) => _snapStart = new Point(e.Location.X, e.Location.Y);
+            pictureBoxCrop.MouseUp += (sender, e) =>
             {
                 if (e.Button == MouseButtons.Left)
                 {
@@ -274,229 +447,51 @@ namespace WebcamLightMeter
                         if (setDistance.ShowDialog() == DialogResult.OK)
                         {
                             double mDistance = setDistance.Distance;
-                            m_each_px = mDistance / pxDistance;
+                            _m_each_px = mDistance / pxDistance;
                         }
                     }
                 }
             };
-            pictureBoxSnap.MouseMove += (sender, e) =>
-             {
-                 if (e.Button == MouseButtons.Right)
-                 {
-                     Point _stop = new Point(e.Location.X, e.Location.Y);
-                     double pxDistance = _snapStart.DistanceTo(_stop);
-                     double mDistance = pxDistance * m_each_px;
-                     textBoxLength.Text = mDistance.ToString();
-                 }
-             };
-        }
-
-        private void MasterForm_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            if (toolStripComboBox1.SelectedItem != null)
+            pictureBoxCrop.MouseMove += (sender, e) =>
             {
-                if (_devices[toolStripComboBox1.SelectedItem.ToString()] == null)
+                if (e.Button == MouseButtons.Right)
                 {
-                    Application.Exit();
-                    return;
+                    Point _stop = new Point(e.Location.X, e.Location.Y);
+                    double pxDistance = _snapStart.DistanceTo(_stop);
+                    double mDistance = pxDistance * _m_each_px;
+                    textBoxLength.Text = mDistance.ToString();
                 }
-
-                if (_devices[toolStripComboBox1.SelectedItem.ToString()] != null && _devices[toolStripComboBox1.SelectedItem.ToString()].IsRunning())
-                {
-                    _devices[toolStripComboBox1.SelectedItem.ToString()].Stop();
-                    _chartRefresh?.Stop();
-                    _gaussTimer?.Stop();
-                    Application.Exit();
-                    return;
-                }
-            }
-
-            Application.Exit();
-            return;
-        }
-
-        private void DelegateMethodDriver(object obj1, Bitmap obj2)
-        {
-            _bitmap = (Bitmap)obj2.Clone();
-            Bitmap bitmap = (Bitmap)obj2.Clone();
-            pictureBoxStream.Image = (Bitmap)bitmap.Clone();
-            _histograms = Analyzer.GetHistogramAndLightness(bitmap, out double lightness);
-
-            _lightnessDataSet.Add(lightness);
-            if (_lightnessDataSet.Count > 300)
-                _lightnessDataSet.RemoveAt(0);
-
-            if (_acquireData)
-            {
-                Utils.AddOrUpdateDictionary(ref _data, "Lightness", lightness);
-                Utils.AddOrUpdateDictionary(ref _data, "MaxR", _histograms['R'].Max());
-                Utils.AddOrUpdateDictionary(ref _data, "MaxG", _histograms['G'].Max());
-                Utils.AddOrUpdateDictionary(ref _data, "MaxB", _histograms['B'].Max());
-            }
-        }
-
-        private void CloseCamToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (toolStripComboBox1.SelectedItem != null && _devices[toolStripComboBox1.SelectedItem.ToString()].IsRunning())
-            {
-                _devices[toolStripComboBox1.SelectedItem.ToString()].Stop();
-                _chartRefresh?.Stop();
-                _gaussTimer?.Stop();
-                _chartRGB.Clear();
-                _chartLightness.Clear();
-                _chartXLine.Clear();
-                _chartYLine.Clear();
-                richTextBox1.Clear();
-                pictureBoxStream.Image = null;
-                pictureBoxStream.Invalidate();
-                pictureBoxSnap.Image = null;
-                pictureBoxSnap.Invalidate();
-                textBoxPosition.Clear();
-                Refresh();
-            }
-        }
-
-        private void SaveThePictureToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (pictureBoxStream.Image != null)
-            {
-                SaveFileDialog saveFileDialog = new SaveFileDialog();
-                saveFileDialog.Filter = "Bitmap Image (.bmp)|*.bmp|Gif Image (.gif)|*.gif|JPEG Image (.jpeg)|*.jpeg|Png Image (.png)|*.png|Tiff Image (.tiff)|*.tiff|Wmf Image (.wmf)|*.wmf";
-                if (saveFileDialog.ShowDialog() == DialogResult.OK)
-                {
-                    pictureBoxStream.Image.Save(saveFileDialog.FileName);
-                    MessageBox.Show("Photo saved.", "WebcamLightMeter", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-                else
-                    MessageBox.Show("Error during save the photo", "WebcamLightMeter", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private void PictureBoxStream_Click(object sender, EventArgs e)
-        {
-            if (_bitmap == null)
-                return;
-
-            Bitmap bitmap = (Bitmap)_bitmap.Clone();
-            //Calculate the position on bitmap
-            float x0 = 0;
-            float y0 = 0;
-            float bitmapW = pictureBoxStream.Width;
-            float bitmapH = pictureBoxStream.Height;
-            if (pictureBoxStream.Width / (float)pictureBoxStream.Height < bitmap.Width / (float)bitmap.Height)
-            {
-                bitmapW = pictureBoxStream.Width;
-                bitmapH = bitmapW * bitmap.Height / bitmap.Width;
-                y0 = (float)(pictureBoxStream.Height - bitmapH) / 2;
-            }
-            else if (pictureBoxStream.Width / (float)pictureBoxStream.Height > bitmap.Width / (float)bitmap.Height)
-            {
-                bitmapH = pictureBoxStream.Height;
-                bitmapW = bitmapH * bitmap.Width / bitmap.Height;
-                x0 = (float)(pictureBoxStream.Width - bitmapW) / 2;
-            }
-
-            float x = ((MouseEventArgs)e).Location.X - x0;
-            float y = ((MouseEventArgs)e).Location.Y - y0;
-
-            //Real coordinate in image
-            x *= bitmap.Width / bitmapW;
-            y *= bitmap.Height / bitmapH;
-
-            _gaussPosition = new Point((int)x, (int)y);
-            ChangeTimerGaussParameters((int)x, (int)y);
-        }
-
-        private void ChangeTimerGaussParameters(float x, float y)
-        {
-            _gaussTimer?.Stop();
-            _gaussTimer?.Dispose();
-            _gaussTimer = new Timer();
-            _gaussTimer.Interval = _gaussRefreshTime;
-            _gaussTimer.Tick += (s, ea) =>
-            {
-                textBoxPosition.Text = "X: " + x.ToString() + "; " + "Y: " + y.ToString();
-                Bitmap bitmap = (Bitmap)_bitmap.Clone();
-                //Dictionary<string, List<double>> fitting = Analyzer.GaussianFittingXY(bitmap, (int)x, (int)y, (int)_gaussSize);
-
-                //Refresh crop
-                Bitmap cropImage = new Bitmap(bitmap);
-                Rectangle rect = new Rectangle((int)((x - _gaussSize / 2) < 0 ? 0 : (x - _gaussSize / 2)), (int)((y - _gaussSize / 2) < 0 ? 0 : (y - _gaussSize / 2)), (int)_gaussSize, (int)_gaussSize);
-                if (rect.X + rect.Width > bitmap.Width || rect.Y + rect.Height > bitmap.Height)
-                {
-                    rect.Width = Math.Min(bitmap.Width - rect.X, bitmap.Height - rect.Y);
-                    rect.Height = rect.Width;
-                    _gaussSize = rect.Height;
-                }
-                cropImage = cropImage.Clone(rect, cropImage.PixelFormat);
-
-                BeginInvoke((Action)(() =>
-                {
-                    pictureBoxSnap.Image = cropImage;
-
-                    //_chartXLine.Clear();
-                    //List<List<double>> input = new List<List<double>>();
-                    //input.Add(fitting["xLine"]);
-                    //input.Add(fitting["gXLine"]);
-                    //_chartXLine.Values = input;
-                    //_chartXLine.Draw();
-                    //splitContainer3.Panel1.Controls.Clear();
-                    //splitContainer3.Panel1.Controls.Add(_chartXLine);
-                    //
-                    //_chartYLine.Clear();
-                    //input = new List<List<double>>();
-                    //input.Add(fitting["yLine"]);
-                    //input.Add(fitting["gYLine"]);
-                    //_chartYLine.Values = input;
-                    //_chartYLine.Draw();
-                    //splitContainer3.Panel2.Controls.Clear();
-                    //splitContainer3.Panel2.Controls.Add(_chartYLine);
-                }));
             };
-            _gaussTimer.Start();
-        }
 
-        private void DataToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (dataToolStripMenuItem.Text == "Start acquire data")
+            rGBHistogramToolStripMenuItem.Click += (sender, e) =>
             {
-                FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog();
-                if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
+                if (rGBHistogramToolStripMenuItem.Tag.ToString() == "1")
                 {
-                    _directoryForSavingData = folderBrowserDialog.SelectedPath;
-                    dataToolStripMenuItem.Text = "Stop acquire data";
-
-                    _acquireData = true;
-                    _data = new Dictionary<string, List<Tuple<string, double>>>();
+                    rGBHistogramToolStripMenuItem.Tag = "0";
+                    rGBHistogramToolStripMenuItem.Text = "RGB histogram ON";
+                    _chartRGB.Clear();
                 }
-            }
-            else if (dataToolStripMenuItem.Text == "Stop acquire data")
+                else if (rGBHistogramToolStripMenuItem.Tag.ToString() == "0")
+                {
+                    rGBHistogramToolStripMenuItem.Tag = "1";
+                    rGBHistogramToolStripMenuItem.Text = "RGB histogram OFF";
+                }
+            };
+
+            lightnessIntensityToolStripMenuItem.Click += (sender, e) =>
             {
-                _acquireData = false;
-                dataToolStripMenuItem.Text = "Saving...";
-
-                for (int k = 0; k < _data.Keys.Count; k++)
+                if (lightnessIntensityToolStripMenuItem.Tag.ToString() == "1")
                 {
-                    string strData = "";
-                    for (int i = 0; i < _data[_data.Keys.ElementAt(k)].Count; i++)
-                        strData += _data[_data.Keys.ElementAt(k)][i].Item1 + "#" + _data[_data.Keys.ElementAt(k)][i].Item2 + Environment.NewLine;
-
-                    File.WriteAllText(_directoryForSavingData + "\\" + _data.Keys.ElementAt(k) + ".txt", strData);
+                    lightnessIntensityToolStripMenuItem.Tag = "0";
+                    lightnessIntensityToolStripMenuItem.Text = "Lightness intensity ON";
+                    _chartLightness.Clear();
                 }
-
-                dataToolStripMenuItem.Text = "Start acquire data";
-            }
-        }
-
-        private void StartCalibrationToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            CalibrationForm calibrationForm = new CalibrationForm(pictureBoxStream, toolStripComboBox2);
-            calibrationForm.Show();
-        }
-
-        private void ExitToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            MasterForm_FormClosing(null, null);
+                else if (lightnessIntensityToolStripMenuItem.Tag.ToString() == "0")
+                {
+                    lightnessIntensityToolStripMenuItem.Tag = "1";
+                    lightnessIntensityToolStripMenuItem.Text = "Lightness intensity OFF";
+                }
+            };
         }
     }
 }

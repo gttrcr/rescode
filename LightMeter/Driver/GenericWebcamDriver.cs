@@ -1,9 +1,9 @@
-﻿using AForge.Video;
-using AForge.Video.DirectShow;
+﻿using AForge.Video.DirectShow;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Threading;
 
 namespace Driver
 {
@@ -39,7 +39,8 @@ namespace Driver
             _currentDevice = new VideoCaptureDevice(_nameIdDictionary[(string)id]);
             _currentDevice.NewFrame += (sender, e) =>
             {
-                newFrameCallback.Invoke(sender, e.Frame);
+                newFrameCallback.Invoke(sender, (Bitmap)e.Frame.Clone());
+                GC.Collect();
             };
             _currentDevice.Start();
             _isRunning = true;

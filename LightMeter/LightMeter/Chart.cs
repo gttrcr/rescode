@@ -127,7 +127,7 @@
             double[] normalizedData = values.ToArray();
 
             for (int i = 0; i < normalizedData.Length; ++i)
-                normalizedData[i] = (values[i] * maxHeight) / maxValue;
+                normalizedData[i] = maxValue != 0 ? (values[i] * maxHeight) / maxValue : 0;
 
             return normalizedData;
         }
