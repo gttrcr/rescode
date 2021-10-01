@@ -41,18 +41,13 @@
             this.loadCalibrationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripComboBoxCalibrations = new System.Windows.Forms.ToolStripComboBox();
             this.streamToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.refreshTimeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripTextBoxRefresh = new System.Windows.Forms.ToolStripTextBox();
             this.sizeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripTextBoxSize = new System.Windows.Forms.ToolStripTextBox();
-            this.followLightToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.chartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.chartRGBToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.logToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.linearToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.rGBHistogramToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.lightnessIntensityToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.pictureBoxStream = new System.Windows.Forms.PictureBox();
@@ -90,9 +85,7 @@
             this.calibrationToolStripMenuItem,
             this.streamToolStripMenuItem,
             this.chartToolStripMenuItem,
-            this.rGBHistogramToolStripMenuItem,
-            this.dataToolStripMenuItem,
-            this.lightnessIntensityToolStripMenuItem});
+            this.dataToolStripMenuItem});
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
             this.menuStrip.Size = new System.Drawing.Size(1023, 28);
@@ -120,7 +113,6 @@
             // 
             // toolStripComboBoxDevices
             // 
-            this.toolStripComboBoxDevices.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.toolStripComboBoxDevices.Name = "toolStripComboBoxDevices";
             this.toolStripComboBoxDevices.Size = new System.Drawing.Size(121, 28);
             // 
@@ -171,33 +163,16 @@
             // 
             // toolStripComboBoxCalibrations
             // 
-            this.toolStripComboBoxCalibrations.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.toolStripComboBoxCalibrations.Name = "toolStripComboBoxCalibrations";
             this.toolStripComboBoxCalibrations.Size = new System.Drawing.Size(121, 28);
             // 
             // streamToolStripMenuItem
             // 
             this.streamToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.refreshTimeToolStripMenuItem,
-            this.sizeToolStripMenuItem,
-            this.followLightToolStripMenuItem});
+            this.sizeToolStripMenuItem});
             this.streamToolStripMenuItem.Name = "streamToolStripMenuItem";
             this.streamToolStripMenuItem.Size = new System.Drawing.Size(70, 24);
             this.streamToolStripMenuItem.Text = "Stream";
-            // 
-            // refreshTimeToolStripMenuItem
-            // 
-            this.refreshTimeToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripTextBoxRefresh});
-            this.refreshTimeToolStripMenuItem.Name = "refreshTimeToolStripMenuItem";
-            this.refreshTimeToolStripMenuItem.Size = new System.Drawing.Size(237, 26);
-            this.refreshTimeToolStripMenuItem.Text = "Refresh time (ms)";
-            // 
-            // toolStripTextBoxRefresh
-            // 
-            this.toolStripTextBoxRefresh.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.toolStripTextBoxRefresh.Name = "toolStripTextBoxRefresh";
-            this.toolStripTextBoxRefresh.Size = new System.Drawing.Size(100, 27);
             // 
             // sizeToolStripMenuItem
             // 
@@ -209,14 +184,8 @@
             // 
             // toolStripTextBoxSize
             // 
-            this.toolStripTextBoxSize.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.toolStripTextBoxSize.Name = "toolStripTextBoxSize";
             this.toolStripTextBoxSize.Size = new System.Drawing.Size(100, 27);
-            // 
-            // followLightToolStripMenuItem
-            // 
-            this.followLightToolStripMenuItem.Name = "followLightToolStripMenuItem";
-            this.followLightToolStripMenuItem.Size = new System.Drawing.Size(237, 26);
             // 
             // chartToolStripMenuItem
             // 
@@ -247,26 +216,12 @@
             this.linearToolStripMenuItem.Size = new System.Drawing.Size(132, 26);
             this.linearToolStripMenuItem.Text = "Linear";
             // 
-            // rGBHistogramToolStripMenuItem
-            // 
-            this.rGBHistogramToolStripMenuItem.Name = "rGBHistogramToolStripMenuItem";
-            this.rGBHistogramToolStripMenuItem.Size = new System.Drawing.Size(151, 24);
-            this.rGBHistogramToolStripMenuItem.Tag = "1";
-            this.rGBHistogramToolStripMenuItem.Text = "RGB histogram OFF";
-            // 
             // dataToolStripMenuItem
             // 
             this.dataToolStripMenuItem.Name = "dataToolStripMenuItem";
             this.dataToolStripMenuItem.Size = new System.Drawing.Size(141, 24);
             this.dataToolStripMenuItem.Text = "Start acquire data";
             this.dataToolStripMenuItem.Click += new System.EventHandler(this.DataToolStripMenuItem_Click);
-            // 
-            // lightnessIntensityToolStripMenuItem
-            // 
-            this.lightnessIntensityToolStripMenuItem.Name = "lightnessIntensityToolStripMenuItem";
-            this.lightnessIntensityToolStripMenuItem.Size = new System.Drawing.Size(172, 24);
-            this.lightnessIntensityToolStripMenuItem.Tag = "1";
-            this.lightnessIntensityToolStripMenuItem.Text = "Lightness intensity OFF";
             // 
             // splitContainer2
             // 
@@ -312,7 +267,7 @@
             this.pictureBoxStream.Location = new System.Drawing.Point(0, 0);
             this.pictureBoxStream.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBoxStream.Name = "pictureBoxStream";
-            this.pictureBoxStream.Size = new System.Drawing.Size(675, 300);
+            this.pictureBoxStream.Size = new System.Drawing.Size(540, 240);
             this.pictureBoxStream.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBoxStream.TabIndex = 10;
             this.pictureBoxStream.TabStop = false;
@@ -323,7 +278,7 @@
             this.textBoxLength.Location = new System.Drawing.Point(0, 0);
             this.textBoxLength.Name = "textBoxLength";
             this.textBoxLength.ReadOnly = true;
-            this.textBoxLength.Size = new System.Drawing.Size(675, 28);
+            this.textBoxLength.Size = new System.Drawing.Size(540, 22);
             this.textBoxLength.TabIndex = 18;
             // 
             // pictureBoxCrop
@@ -333,7 +288,7 @@
             this.pictureBoxCrop.Location = new System.Drawing.Point(0, 0);
             this.pictureBoxCrop.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBoxCrop.Name = "pictureBoxCrop";
-            this.pictureBoxCrop.Size = new System.Drawing.Size(675, 575);
+            this.pictureBoxCrop.Size = new System.Drawing.Size(540, 460);
             this.pictureBoxCrop.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBoxCrop.TabIndex = 16;
             this.pictureBoxCrop.TabStop = false;
@@ -430,12 +385,9 @@
         private System.Windows.Forms.ToolStripComboBox toolStripComboBoxDevices;
         private System.Windows.Forms.ToolStripMenuItem closeCamToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem saveThePictureToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem refreshTimeToolStripMenuItem;
-        private System.Windows.Forms.ToolStripTextBox toolStripTextBoxRefresh;
         private System.Windows.Forms.ToolStripMenuItem sizeToolStripMenuItem;
         private System.Windows.Forms.ToolStripTextBox toolStripTextBoxSize;
         private System.Windows.Forms.ToolStripMenuItem dataToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem followLightToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem calibrationToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem newCalibrationToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem loadCalibrationToolStripMenuItem;
@@ -448,7 +400,5 @@
         private System.Windows.Forms.SplitContainer splitContainer6;
         private System.Windows.Forms.SplitContainer splitContainer3;
         private System.Windows.Forms.TextBox textBoxLength;
-        private System.Windows.Forms.ToolStripMenuItem lightnessIntensityToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem rGBHistogramToolStripMenuItem;
     }
 }

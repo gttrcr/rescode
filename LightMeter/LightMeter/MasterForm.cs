@@ -20,11 +20,10 @@ namespace WebcamLightMeter
         private Dictionary<char, List<int>> _histograms;
         private List<IDriver> _driverList;
         private Dictionary<string, IDriver> _devices;
-        private int _cropRefreshTime = 0;
-        private double _gaussSize = 0;
+        private float _cropSize = 0;
         private Timer _chartRefresh;
-        private Timer _cropTimer;
-        private Point _gaussPosition;
+        private Point _clickPosition;
+        private Point _cropPosition;
         private bool _acquireData;
         private Dictionary<string, List<Tuple<string, double>>> _data;
         private string _directoryForSavingData;
@@ -81,7 +80,6 @@ namespace WebcamLightMeter
                 {
                     _devices[toolStripComboBoxDevices.SelectedItem.ToString()].Stop();
                     _chartRefresh?.Stop();
-                    _cropTimer?.Stop();
                     Application.Exit();
                     return;
                 }
@@ -97,7 +95,6 @@ namespace WebcamLightMeter
             {
                 _devices[toolStripComboBoxDevices.SelectedItem.ToString()].Stop();
                 _chartRefresh?.Stop();
-                _cropTimer?.Stop();
                 _chartRGB.Clear();
                 _chartLightness.Clear();
                 pictureBoxStream.Image = null;
@@ -144,15 +141,18 @@ namespace WebcamLightMeter
                 x0 = (float)(pictureBoxStream.Width - bitmapW) / 2;
             }
 
-            float x = ((MouseEventArgs)e).Location.X - x0;
-            float y = ((MouseEventArgs)e).Location.Y - y0;
+            float x = ((MouseEventArgs)e).Location.X;
+            float y = ((MouseEventArgs)e).Location.Y;
+            _clickPosition = new Point(x, y);
+            x -= x0;
+            y -= y0;
 
             //Real coordinate in image
             x *= pictureBoxStream.Image.Width / bitmapW;
             y *= pictureBoxStream.Image.Height / bitmapH;
 
-            _gaussPosition = new Point((int)x, (int)y);
-            ChangeTimerGaussParameters((int)x, (int)y);
+            _cropPosition = new Point((int)x, (int)y);
+            //Crop();
         }
 
         private void DataToolStripMenuItem_Click(object sender, EventArgs e)
@@ -198,37 +198,35 @@ namespace WebcamLightMeter
             MasterForm_FormClosing(null, null);
         }
 
-        private void ChangeTimerGaussParameters(float x, float y)
+        private void Crop()
         {
-            _cropTimer?.Stop();
-            _cropTimer?.Dispose();
-            _cropTimer = new Timer();
-            _cropTimer.Interval = _cropRefreshTime;
-            _cropTimer.Tick += (s, ea) =>
-            {   
-                //Refresh crop
-                Bitmap cropImage = new Bitmap(pictureBoxStream.Image);
-                Rectangle rect = new Rectangle((int)((x - _gaussSize / 2) < 0 ? 0 : (x - _gaussSize / 2)), (int)((y - _gaussSize / 2) < 0 ? 0 : (y - _gaussSize / 2)), (int)_gaussSize, (int)_gaussSize);
-                if (rect.X + rect.Width > pictureBoxStream.Image.Width || rect.Y + rect.Height > pictureBoxStream.Image.Height)
-                {
-                    rect.Width = Math.Min(pictureBoxStream.Image.Width - rect.X, pictureBoxStream.Image.Height - rect.Y);
-                    rect.Height = rect.Width;
-                    _gaussSize = rect.Height;
-                }
-                cropImage = cropImage.Clone(rect, cropImage.PixelFormat);
-                pictureBoxCrop.Image = cropImage;
-            };
-            _cropTimer.Start();
+            //Refresh crop
+            Rectangle rect = new Rectangle((int)((_cropPosition.X - _cropSize / 2) < 0 ? 0 : (_cropPosition.X - _cropSize / 2)), (int)((_cropPosition.Y - _cropSize / 2) < 0 ? 0 : (_cropPosition.Y - _cropSize / 2)), (int)_cropSize, (int)_cropSize);
+            if (rect.X + rect.Width > pictureBoxStream.Image.Width || rect.Y + rect.Height > pictureBoxStream.Image.Height)
+            {
+                rect.Width = Math.Min(pictureBoxStream.Image.Width - rect.X, pictureBoxStream.Image.Height - rect.Y);
+                rect.Height = rect.Width;
+                _cropSize = rect.Height;
+            }
+            Bitmap cropImage = new Bitmap(pictureBoxStream.Image);
+            cropImage = cropImage.Clone(rect, cropImage.PixelFormat);
+            pictureBoxCrop.Image = cropImage;
         }
 
         private void DelegateMethodDriver(object obj1, Bitmap obj2)
         {
             pictureBoxStream.Image = obj2;
             _histograms = Analyzer.GetHistogramAndLightness((Bitmap)pictureBoxStream.Image, out double lightness);
-            
+
+            if (_clickPosition != null && _clickPosition != new Point(0, 0))
+                pictureBoxStream.CreateGraphics().DrawRectangle(new Pen(Color.White), _clickPosition.X - _cropSize / 4, _clickPosition.Y - _cropSize / 4, _cropSize / 2, _cropSize / 2);
+
             _lightnessDataSet.Add(lightness);
             if (_lightnessDataSet.Count > 300)
                 _lightnessDataSet.RemoveAt(0);
+
+            if(_cropPosition != null && _cropPosition!=new Point(0, 0))
+                Crop();
 
             if (_acquireData)
             {
@@ -252,31 +250,14 @@ namespace WebcamLightMeter
                 _chartRefresh.Start();
             };
 
-            toolStripTextBoxRefresh.KeyDown += (sender, e) =>
-            {
-                if (e.KeyCode == Keys.Enter)
-                {
-                    if (int.TryParse(toolStripTextBoxRefresh.Text, out int val))
-                    {
-                        if (_cropTimer != null)
-                            _cropTimer.Interval = val;
-                        streamToolStripMenuItem.HideDropDown();
-                        _cropRefreshTime = val;
-                    }
-                    else
-                        MessageBox.Show("Cannot parse value from refresh time", "WebcamLightMeter", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            };
-
             toolStripTextBoxSize.KeyDown += (sender, e) =>
             {
                 if (e.KeyCode == Keys.Enter)
                 {
-                    if (double.TryParse(toolStripTextBoxSize.Text, out double val))
+                    if (float.TryParse(toolStripTextBoxSize.Text, out float val))
                     {
-                        _gaussSize = val;
+                        _cropSize = val;
                         streamToolStripMenuItem.HideDropDown();
-                        ChangeTimerGaussParameters(_gaussPosition.X, _gaussPosition.Y);
                     }
                     else
                         MessageBox.Show("Cannot parse value for size", "WebcamLightMeter", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -289,10 +270,8 @@ namespace WebcamLightMeter
             splitContainer6.SplitterDistance = splitContainer6.ClientSize.Height / 2;
             pictureBoxStream.Click += PictureBoxStream_Click;
 
-            toolStripTextBoxRefresh.Text = "500";
             toolStripTextBoxSize.Text = "200";
-            _cropRefreshTime = 500;
-            _gaussSize = 200;
+            _cropSize = 200;
 
             toolStripComboBoxCalibrations.SelectedIndexChanged += (sender, e) =>
             {
@@ -376,7 +355,7 @@ namespace WebcamLightMeter
             _chartRefresh.Interval = 200;
             _chartRefresh.Tick += (sender, e) =>
             {
-                if (_histograms != null && rGBHistogramToolStripMenuItem.Tag.ToString() == "1")
+                if (_histograms != null)
                 {
                     _chartRGB.Clear();
                     List<List<double>> input = new List<List<double>>();
@@ -389,7 +368,7 @@ namespace WebcamLightMeter
                     splitContainer5.Panel1.Controls.Add(_chartRGB);
                 }
 
-                if (_lightnessDataSet != null && _lightnessDataSet.Count != 0 && lightnessIntensityToolStripMenuItem.Tag.ToString() == "1")
+                if (_lightnessDataSet != null && _lightnessDataSet.Count != 0)
                 {
                     _chartLightness.Clear();
                     List<List<double>> input = new List<List<double>>();
@@ -429,36 +408,6 @@ namespace WebcamLightMeter
                     double pxDistance = _snapStart.DistanceTo(_stop);
                     double mDistance = pxDistance * _m_each_px;
                     textBoxLength.Text = mDistance.ToString();
-                }
-            };
-
-            rGBHistogramToolStripMenuItem.Click += (sender, e) =>
-            {
-                if (rGBHistogramToolStripMenuItem.Tag.ToString() == "1")
-                {
-                    rGBHistogramToolStripMenuItem.Tag = "0";
-                    rGBHistogramToolStripMenuItem.Text = "RGB histogram ON";
-                    _chartRGB.Clear();
-                }
-                else if (rGBHistogramToolStripMenuItem.Tag.ToString() == "0")
-                {
-                    rGBHistogramToolStripMenuItem.Tag = "1";
-                    rGBHistogramToolStripMenuItem.Text = "RGB histogram OFF";
-                }
-            };
-
-            lightnessIntensityToolStripMenuItem.Click += (sender, e) =>
-            {
-                if (lightnessIntensityToolStripMenuItem.Tag.ToString() == "1")
-                {
-                    lightnessIntensityToolStripMenuItem.Tag = "0";
-                    lightnessIntensityToolStripMenuItem.Text = "Lightness intensity ON";
-                    _chartLightness.Clear();
-                }
-                else if (lightnessIntensityToolStripMenuItem.Tag.ToString() == "0")
-                {
-                    lightnessIntensityToolStripMenuItem.Tag = "1";
-                    lightnessIntensityToolStripMenuItem.Text = "Lightness intensity OFF";
                 }
             };
         }
