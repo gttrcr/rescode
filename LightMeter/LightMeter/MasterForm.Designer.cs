@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MasterForm));
             this.menuStrip = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filterInfoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -54,7 +55,6 @@
             this.lightnessIntensityToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.splitContainer4 = new System.Windows.Forms.SplitContainer();
             this.pictureBoxStream = new System.Windows.Forms.PictureBox();
             this.textBoxLength = new System.Windows.Forms.TextBox();
             this.pictureBoxCrop = new System.Windows.Forms.PictureBox();
@@ -68,11 +68,8 @@
             this.splitContainer2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
+            this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer4)).BeginInit();
-            this.splitContainer4.Panel1.SuspendLayout();
-            this.splitContainer4.Panel2.SuspendLayout();
-            this.splitContainer4.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxStream)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxCrop)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer5)).BeginInit();
@@ -123,6 +120,7 @@
             // 
             // toolStripComboBoxDevices
             // 
+            this.toolStripComboBoxDevices.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.toolStripComboBoxDevices.Name = "toolStripComboBoxDevices";
             this.toolStripComboBoxDevices.Size = new System.Drawing.Size(121, 28);
             // 
@@ -173,6 +171,7 @@
             // 
             // toolStripComboBoxCalibrations
             // 
+            this.toolStripComboBoxCalibrations.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.toolStripComboBoxCalibrations.Name = "toolStripComboBoxCalibrations";
             this.toolStripComboBoxCalibrations.Size = new System.Drawing.Size(121, 28);
             // 
@@ -196,6 +195,7 @@
             // 
             // toolStripTextBoxRefresh
             // 
+            this.toolStripTextBoxRefresh.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.toolStripTextBoxRefresh.Name = "toolStripTextBoxRefresh";
             this.toolStripTextBoxRefresh.Size = new System.Drawing.Size(100, 27);
             // 
@@ -209,6 +209,7 @@
             // 
             // toolStripTextBoxSize
             // 
+            this.toolStripTextBoxSize.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.toolStripTextBoxSize.Name = "toolStripTextBoxSize";
             this.toolStripTextBoxSize.Size = new System.Drawing.Size(100, 27);
             // 
@@ -294,29 +295,15 @@
             // 
             // splitContainer1.Panel1
             // 
-            this.splitContainer1.Panel1.Controls.Add(this.splitContainer4);
+            this.splitContainer1.Panel1.Controls.Add(this.pictureBoxStream);
+            // 
+            // splitContainer1.Panel2
+            // 
+            this.splitContainer1.Panel2.Controls.Add(this.textBoxLength);
+            this.splitContainer1.Panel2.Controls.Add(this.pictureBoxCrop);
             this.splitContainer1.Size = new System.Drawing.Size(540, 704);
             this.splitContainer1.SplitterDistance = 240;
             this.splitContainer1.TabIndex = 0;
-            // 
-            // splitContainer4
-            // 
-            this.splitContainer4.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.splitContainer4.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer4.Location = new System.Drawing.Point(0, 0);
-            this.splitContainer4.Name = "splitContainer4";
-            // 
-            // splitContainer4.Panel1
-            // 
-            this.splitContainer4.Panel1.Controls.Add(this.pictureBoxStream);
-            // 
-            // splitContainer4.Panel2
-            // 
-            this.splitContainer4.Panel2.Controls.Add(this.textBoxLength);
-            this.splitContainer4.Panel2.Controls.Add(this.pictureBoxCrop);
-            this.splitContainer4.Size = new System.Drawing.Size(540, 240);
-            this.splitContainer4.SplitterDistance = 253;
-            this.splitContainer4.TabIndex = 21;
             // 
             // pictureBoxStream
             // 
@@ -325,7 +312,7 @@
             this.pictureBoxStream.Location = new System.Drawing.Point(0, 0);
             this.pictureBoxStream.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBoxStream.Name = "pictureBoxStream";
-            this.pictureBoxStream.Size = new System.Drawing.Size(249, 236);
+            this.pictureBoxStream.Size = new System.Drawing.Size(675, 300);
             this.pictureBoxStream.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBoxStream.TabIndex = 10;
             this.pictureBoxStream.TabStop = false;
@@ -336,7 +323,7 @@
             this.textBoxLength.Location = new System.Drawing.Point(0, 0);
             this.textBoxLength.Name = "textBoxLength";
             this.textBoxLength.ReadOnly = true;
-            this.textBoxLength.Size = new System.Drawing.Size(279, 22);
+            this.textBoxLength.Size = new System.Drawing.Size(675, 28);
             this.textBoxLength.TabIndex = 18;
             // 
             // pictureBoxCrop
@@ -346,7 +333,7 @@
             this.pictureBoxCrop.Location = new System.Drawing.Point(0, 0);
             this.pictureBoxCrop.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBoxCrop.Name = "pictureBoxCrop";
-            this.pictureBoxCrop.Size = new System.Drawing.Size(279, 236);
+            this.pictureBoxCrop.Size = new System.Drawing.Size(675, 575);
             this.pictureBoxCrop.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBoxCrop.TabIndex = 16;
             this.pictureBoxCrop.TabStop = false;
@@ -398,6 +385,7 @@
             this.ClientSize = new System.Drawing.Size(1023, 736);
             this.Controls.Add(this.splitContainer2);
             this.Controls.Add(this.menuStrip);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "MasterForm";
             this.Text = "WebcamLightMeter";
@@ -410,13 +398,10 @@
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
             this.splitContainer2.ResumeLayout(false);
             this.splitContainer1.Panel1.ResumeLayout(false);
+            this.splitContainer1.Panel2.ResumeLayout(false);
+            this.splitContainer1.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
-            this.splitContainer4.Panel1.ResumeLayout(false);
-            this.splitContainer4.Panel2.ResumeLayout(false);
-            this.splitContainer4.Panel2.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer4)).EndInit();
-            this.splitContainer4.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxStream)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxCrop)).EndInit();
             this.splitContainer5.Panel2.ResumeLayout(false);
@@ -457,7 +442,6 @@
         private System.Windows.Forms.ToolStripComboBox toolStripComboBoxCalibrations;
         private System.Windows.Forms.SplitContainer splitContainer2;
         private System.Windows.Forms.SplitContainer splitContainer1;
-        private System.Windows.Forms.SplitContainer splitContainer4;
         private System.Windows.Forms.PictureBox pictureBoxStream;
         private System.Windows.Forms.PictureBox pictureBoxCrop;
         private System.Windows.Forms.SplitContainer splitContainer5;

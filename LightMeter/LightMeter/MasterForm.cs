@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Windows.Forms;
 using Point = Accord.Point;
 using Timer = System.Windows.Forms.Timer;
@@ -17,11 +16,8 @@ namespace WebcamLightMeter
     {
         private Chart _chartRGB;
         private Chart _chartLightness;
-        private Chart _chartXLine;
-        private Chart _chartYLine;
         private List<double> _lightnessDataSet;
         private Dictionary<char, List<int>> _histograms;
-
         private List<IDriver> _driverList;
         private Dictionary<string, IDriver> _devices;
         private int _cropRefreshTime = 0;
@@ -104,8 +100,6 @@ namespace WebcamLightMeter
                 _cropTimer?.Stop();
                 _chartRGB.Clear();
                 _chartLightness.Clear();
-                _chartXLine.Clear();
-                _chartYLine.Clear();
                 pictureBoxStream.Image = null;
                 pictureBoxStream.Invalidate();
                 pictureBoxCrop.Image = null;
@@ -291,7 +285,6 @@ namespace WebcamLightMeter
 
             splitContainer2.SplitterDistance = splitContainer2.ClientSize.Width / 2;
             splitContainer3.SplitterDistance = splitContainer3.ClientSize.Width / 2;
-            splitContainer4.SplitterDistance = 2 * splitContainer4.ClientSize.Width / 3;
             splitContainer5.SplitterDistance = splitContainer5.ClientSize.Height / 3;
             splitContainer6.SplitterDistance = splitContainer6.ClientSize.Height / 2;
             pictureBoxStream.Click += PictureBoxStream_Click;
@@ -361,26 +354,6 @@ namespace WebcamLightMeter
                 Title = "Lightness intensity",
                 AxisPen = new Pen(Color.Black, 1),
                 DataPen = new List<Pen>() { new Pen(Color.LightBlue, 2) }
-            };
-
-            _chartXLine = new Chart(splitContainer3.Panel1.ClientSize.Width, splitContainer3.Panel1.ClientSize.Height)
-            {
-                Dock = DockStyle.Fill,
-                LegendX = "X position",
-                LegendY = "Intensity",
-                Title = "Intensity distribution around custom point along X axis",
-                AxisPen = new Pen(Color.Black, 1),
-                DataPen = new List<Pen>() { new Pen(Color.Blue, 2), new Pen(Color.Green, 2) }
-            };
-
-            _chartYLine = new Chart(splitContainer3.Panel2.ClientSize.Width, splitContainer3.Panel2.ClientSize.Height)
-            {
-                Dock = DockStyle.Fill,
-                LegendX = "Y position",
-                LegendY = "Intensity",
-                Title = "Intensity distribution around custom point along Y axis",
-                AxisPen = new Pen(Color.Black, 1),
-                DataPen = new List<Pen>() { new Pen(Color.Blue, 2), new Pen(Color.Green, 2) }
             };
 
             logToolStripMenuItem.Click += (sender, e) =>
