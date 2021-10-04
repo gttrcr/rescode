@@ -152,27 +152,26 @@ namespace WebcamLightMeter
             y *= pictureBoxStream.Image.Height / bitmapH;
 
             _cropPosition = new Point((int)x, (int)y);
-            //Crop();
         }
 
-        private void DataToolStripMenuItem_Click(object sender, EventArgs e)
+        private void StartAcquireDataToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (dataToolStripMenuItem.Text == "Start acquire data")
+            if (startAcquireDataToolStripMenuItem.Text == "Start acquire data")
             {
                 FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog();
                 if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
                 {
                     _directoryForSavingData = folderBrowserDialog.SelectedPath;
-                    dataToolStripMenuItem.Text = "Stop acquire data";
+                    startAcquireDataToolStripMenuItem.Text = "Stop acquire data";
 
                     _acquireData = true;
                     _data = new Dictionary<string, List<Tuple<string, double>>>();
                 }
             }
-            else if (dataToolStripMenuItem.Text == "Stop acquire data")
+            else if (startAcquireDataToolStripMenuItem.Text == "Stop acquire data")
             {
                 _acquireData = false;
-                dataToolStripMenuItem.Text = "Saving...";
+                startAcquireDataToolStripMenuItem.Text = "Saving...";
 
                 for (int k = 0; k < _data.Keys.Count; k++)
                 {
@@ -183,7 +182,7 @@ namespace WebcamLightMeter
                     File.WriteAllText(_directoryForSavingData + "\\" + _data.Keys.ElementAt(k) + ".txt", strData);
                 }
 
-                dataToolStripMenuItem.Text = "Start acquire data";
+                startAcquireDataToolStripMenuItem.Text = "Start acquire data";
             }
         }
 
@@ -216,7 +215,7 @@ namespace WebcamLightMeter
         private void DelegateMethodDriver(object obj1, Bitmap obj2)
         {
             pictureBoxStream.Image = obj2;
-            _histograms = Analyzer.GetHistogramAndLightness((Bitmap)pictureBoxStream.Image, out double lightness);
+            _histograms = Analyzer.GetHistogramAndLightness(pictureBoxStream.Image, out double lightness);
 
             if (_clickPosition != null && _clickPosition != new Point(0, 0))
                 pictureBoxStream.CreateGraphics().DrawRectangle(new Pen(Color.White), _clickPosition.X - _cropSize / 4, _clickPosition.Y - _cropSize / 4, _cropSize / 2, _cropSize / 2);
@@ -225,8 +224,11 @@ namespace WebcamLightMeter
             if (_lightnessDataSet.Count > 300)
                 _lightnessDataSet.RemoveAt(0);
 
-            if(_cropPosition != null && _cropPosition!=new Point(0, 0))
+            if (_cropPosition != null && _cropPosition != new Point(0, 0))
+            {
                 Crop();
+                Analyzer.FindSpotlight(pictureBoxCrop.Image, out int xSize, out int ySize);
+            }
 
             if (_acquireData)
             {
@@ -410,6 +412,11 @@ namespace WebcamLightMeter
                     textBoxLength.Text = mDistance.ToString();
                 }
             };
+        }
+
+        private void TrackSpotlightToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

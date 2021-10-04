@@ -4,14 +4,6 @@ namespace LightAnalyzer
 {
     public class MathUtils
     {
-        /// <summary>
-        /// Fits a line to a collection of (x,y) points.
-        /// </summary>
-        /// <param name="xVals">The x-axis values.</param>
-        /// <param name="yVals">The y-axis values.</param>
-        /// <param name="rSquared">The r^2 value of the line.</param>
-        /// <param name="yIntercept">The y-intercept value of the line (i.e. y = ax + b, yIntercept is b).</param>
-        /// <param name="slope">The slop of the line (i.e. y = ax + b, slope is a).</param>
         public static void LinearRegression(double[] xVals, double[] yVals, out double rSquared, out double yIntercept, out double slope)
         {
             if (xVals.Length != yVals.Length)
@@ -49,14 +41,6 @@ namespace LightAnalyzer
             rSquared = dblR * dblR;
             yIntercept = meanY - ((sCo / ssX) * meanX);
             slope = sCo / ssX;
-        }
-
-        public static bool RangePercEqual(double a, double b, double perc)
-        {
-            if (a + perc * a / 200.0 >= b && a - perc * a / 200.0 <= b)
-                return true;
-
-            return false;
         }
     }
 }
