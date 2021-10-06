@@ -111,6 +111,11 @@ namespace FollowSpotlight
 
         private static double ProcessFrameMode2(ref Bitmap bmp)
         {
+            //workaround to loose information from 24bpp to 4bpp
+            bmp = bmp.Clone(new Rectangle(0, 0, bmp.Width, bmp.Height), PixelFormat.Format4bppIndexed);
+            bmp = bmp.Clone(new Rectangle(0, 0, bmp.Width, bmp.Height), PixelFormat.Format24bppRgb);
+
+            //get points above the average
             List<Tuple<double, Point>> points = GetLightness(ref bmp);
             double avgBright = points.Average(x => x.Item1);
             List<Point> pointsAbove = points.Where(x => x.Item1 > avgBright).Select(x => x.Item2).ToList();
@@ -118,25 +123,59 @@ namespace FollowSpotlight
             int xMin = pointsAbove.Min(x => x.X);
             int yMax = pointsAbove.Max(x => x.Y);
             int yMin = pointsAbove.Min(x => x.Y);
-            pointsAbove = pointsAbove.Select(x => new Point(x.X - xMin, x.Y - yMin)).ToList();
 
+            //map points above on the resized position
+            pointsAbove = pointsAbove.Select(x => new Point(x.X - xMin, x.Y - yMin)).ToList();
             Bitmap tmp = new Bitmap(xMax - xMin + 3, yMax - yMin + 3);
             Graphics.FromImage(tmp).FillRectangle(new SolidBrush(Color.White), 0, 0, tmp.Width, tmp.Height);
             pointsAbove.ForEach(x => tmp.SetPixel(x.X + 1, x.Y + 1, Color.Black));
+            int S = pointsAbove.Count;
 
+            //get borders of the points above
             List<Point> border = GetBorder(ref tmp);
-            //for (int x = 1; x < tmp.Width - 1; x++)
-            //    for (int y = 1; y < tmp.Height - 1; y++)
-            //        if ((tmp.GetPixel(x, y).Name == "ff000000" && tmp.GetPixel(x, y - 1).Name == "ffffffff") ||
-            //                (tmp.GetPixel(x, y).Name == "ff000000" && tmp.GetPixel(x - 1, y).Name == "ffffffff") ||
-            //                (tmp.GetPixel(x, y).Name == "ff000000" && tmp.GetPixel(x, y + 1).Name == "ffffffff") ||
-            //                (tmp.GetPixel(x, y).Name == "ff000000" && tmp.GetPixel(x + 1, y).Name == "ffffffff"))
-            //            border.Add(new Point(x, y));
-            double middle = (border.Max(x => (double)x.X) - border.Min(x => (double)x.X)) / 2.0;
-            double distanceFromMiddle = border.Average(x => x.Distance(new Point((int)middle, x.Y)));
-            double peak = border.Max(x => x.Y) - border.Min(x => x.Y) - 2 * distanceFromMiddle;
+            xMax = border.Max(x => x.X);
+            xMin = border.Min(x => x.X);
+            yMax = border.Max(x => x.Y);
+            yMin = border.Min(x => x.Y);
+            tmp = new Bitmap(xMax + 3, yMax + 3);
+            Graphics.FromImage(tmp).FillRectangle(new SolidBrush(Color.White), 0, 0, tmp.Width, tmp.Height);
+            border.ForEach(x => tmp.SetPixel(x.X + 1, x.Y + 1, Color.Black));
+            tmp.Save("border.bmp");
 
-            return peak;
+            double middle = border.Average(x => (double)x.X);
+            List<Point> up = border.Where(x => x.Y < tmp.Height / 2).ToList();
+            //Console.WriteLine("data={" + string.Join(", ", up.Select(x => "{" + x.X + ", " + x.Y + "}")) + "}");
+            List<Point> down = border.Where(x => x.Y >= tmp.Height / 2).ToList();
+            List<Point> left = border.Where(x => x.X < tmp.Width / 2).ToList();
+            List<Point> right = border.Where(x => x.X >= tmp.Width / 2).ToList();
+            List<Point> uLeft = new List<Point>();
+            List<Point> uRight = new List<Point>();
+            int delta = 15;
+            for (int y = 0; y < yMax; y += delta)
+            {
+                List<Point> ol = left.Where(x => x.Y > y && x.Y <= y + delta).ToList();
+                if (ol.Count > 0)
+                    uLeft.Add(new Point((int)ol.Average(x => (double)x.X), (int)ol.Average(x => (double)x.Y)));
+                List<Point> or = right.Where(x => x.Y > y && x.Y <= y + delta).ToList();
+                if (or.Count > 0)
+                    uRight.Add(new Point((int)or.Average(x => (double)x.X), (int)or.Average(x => (double)x.Y)));
+            }
+
+            List<Point> merge = new List<Point>(uLeft);
+            merge.AddRange(uRight);
+
+            tmp = new Bitmap(xMax + 3, yMax + 3);
+            Graphics.FromImage(tmp).FillRectangle(new SolidBrush(Color.White), 0, 0, tmp.Width, tmp.Height);
+            merge.ForEach(x => tmp.SetPixel(x.X + 1, x.Y + 1, Color.Black));
+            tmp.Save("border2.bmp");
+
+            double d = 0;
+            for (int i = 0; i < merge.Count - 1; i++)
+                d += merge[i].Distance(merge[i + 1]);
+
+            double h = d / 2 - Math.PI * 2 * (double)S / d;
+
+            return 0.4;
         }
 
         public static List<Tuple<double, Point>> GetLightness(ref Bitmap img)
