@@ -5,11 +5,14 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using Wolf;
 
 namespace FollowSpotlight
 {
     class Program
     {
+        private static WolframLink wolf;
+        
         static int NotGood()
         {
             Console.WriteLine("Usage example: " + AppDomain.CurrentDomain.FriendlyName + " -arg video1 [video2 ...] -mode [1..2]");
@@ -32,6 +35,7 @@ namespace FollowSpotlight
             if (!int.TryParse(modeStr, out int mode))
                 return NotGood();
 
+            wolf = new WolframLink();
             List<Point> avgPeak = new List<Point>();
             List<double> peak = new List<double>();
             for (int i = 0; i < inputs.Count; i++)
@@ -46,7 +50,7 @@ namespace FollowSpotlight
                     if (mode == 1)
                         avgPeak.Add(ProcessFrameMode1(ref bmp));
                     else if (mode == 2)
-                        peak.Add(ProcessFrameMode2(ref bmp));
+                        ProcessFrameMode2(ref bmp);
                 }
                 else if (new string[] { ".avi" }.Contains(ext))
                 {
@@ -67,7 +71,7 @@ namespace FollowSpotlight
                         if (mode == 1)
                             avgPeak.Add(ProcessFrameMode1(ref bmp));
                         else if (mode == 2)
-                            peak.Add(ProcessFrameMode2(ref bmp));
+                            ProcessFrameMode2(ref bmp);
 
                         Console.Write(Math.Round((float)f * 100.0 / vfr.FrameCount, 2) + "%");
                         Console.CursorLeft = 11;
@@ -109,7 +113,7 @@ namespace FollowSpotlight
             return new Point(avgX, avgY);
         }
 
-        private static double ProcessFrameMode2(ref Bitmap bmp)
+        private static void ProcessFrameMode2(ref Bitmap bmp)
         {
             //workaround to loose information from 24bpp to 4bpp
             bmp = bmp.Clone(new Rectangle(0, 0, bmp.Width, bmp.Height), PixelFormat.Format4bppIndexed);
@@ -144,7 +148,6 @@ namespace FollowSpotlight
 
             double middle = border.Average(x => (double)x.X);
             List<Point> up = border.Where(x => x.Y < tmp.Height / 2).ToList();
-            //Console.WriteLine("data={" + string.Join(", ", up.Select(x => "{" + x.X + ", " + x.Y + "}")) + "}");
             List<Point> down = border.Where(x => x.Y >= tmp.Height / 2).ToList();
             List<Point> left = border.Where(x => x.X < tmp.Width / 2).ToList();
             List<Point> right = border.Where(x => x.X >= tmp.Width / 2).ToList();
@@ -162,20 +165,15 @@ namespace FollowSpotlight
             }
 
             List<Point> merge = new List<Point>(uLeft);
+            uRight.Reverse();
             merge.AddRange(uRight);
+            string str = "data={" + string.Join(", ", merge.Select(x => "{" + x.X + ", " + x.Y + "}")) + "}";
+            wolf.Wolf("");
 
             tmp = new Bitmap(xMax + 3, yMax + 3);
             Graphics.FromImage(tmp).FillRectangle(new SolidBrush(Color.White), 0, 0, tmp.Width, tmp.Height);
             merge.ForEach(x => tmp.SetPixel(x.X + 1, x.Y + 1, Color.Black));
             tmp.Save("border2.bmp");
-
-            double d = 0;
-            for (int i = 0; i < merge.Count - 1; i++)
-                d += merge[i].Distance(merge[i + 1]);
-
-            double h = d / 2 - Math.PI * 2 * (double)S / d;
-
-            return 0.4;
         }
 
         public static List<Tuple<double, Point>> GetLightness(ref Bitmap img)
@@ -244,14 +242,6 @@ namespace FollowSpotlight
             img.UnlockBits(srcData);
 
             return points;
-        }
-    }
-
-    public static class Ext
-    {
-        public static double Distance(this Point p1, Point p2)
-        {
-            return Math.Sqrt(Math.Pow(p1.X - p2.X, 2) + Math.Pow(p1.Y - p2.Y, 2));
         }
     }
 }
