@@ -1,4 +1,4 @@
-﻿using Accord.Video.FFMPEG;
+using Accord.Video.FFMPEG;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -12,17 +12,32 @@ namespace FollowSpotlight
     class Program
     {
         private static WolframLink wolf;
+        
+        static int NotGood()
+        {
+            Console.WriteLine("Usage example: " + AppDomain.CurrentDomain.FriendlyName + " -arg video1 [video2 ...] -mode [1..2]");
+            Console.WriteLine("-mode 1 to track spotlight");
+            Console.WriteLine("-mode 2 to measure spotlight");
+            return 0;
+        }
 
         static int Main(string[] args)
         {
             if (args.Length == 0)
-                return 0;
-
+                return NotGood();
+            
             int indexOfArg = Array.IndexOf(args, "-arg");
-            List<string> inputs = args.ToList().GetRange(indexOfArg + 1, args.Length - indexOfArg - 1);
+            int indexOfMode = Array.IndexOf(args, "-mode");
+            if (indexOfMode < indexOfArg)
+                return NotGood();
+            List<string> inputs = args.ToList().GetRange(indexOfArg + 1, indexOfMode - indexOfArg - 1);
+            string modeStr = args.ToList().GetRange(indexOfMode + 1, 1)[0];
+            if (!int.TryParse(modeStr, out int mode))
+                return NotGood();
 
             wolf = new WolframLink();
-            List<Tuple<string, double>> outputs = new List<Tuple<string, double>>();
+            List<Point> avgPeak = new List<Point>();
+            List<double> peak = new List<double>();
             for (int i = 0; i < inputs.Count; i++)
             {
                 string input = inputs[i];
@@ -32,7 +47,10 @@ namespace FollowSpotlight
                 if (new string[] { ".bmp", ".jpeg", ".jpg", ".png" }.Contains(ext))
                 {
                     Bitmap bmp = new Bitmap(input);
-                    outputs.Add(new Tuple<string, double>(input, ProcessFrameMode2(ref bmp)));
+                    if (mode == 1)
+                        avgPeak.Add(ProcessFrameMode1(ref bmp));
+                    else if (mode == 2)
+                        ProcessFrameMode2(ref bmp);
                 }
                 else if (new string[] { ".avi" }.Contains(ext))
                 {
@@ -50,7 +68,10 @@ namespace FollowSpotlight
                     for (int f = 0; f < vfr.FrameCount; f++)
                     {
                         Bitmap bmp = vfr.ReadVideoFrame(f);
-                        outputs.Add(new Tuple<string, double>(input + "_frame" + f.ToString(), ProcessFrameMode2(ref bmp)));
+                        if (mode == 1)
+                            avgPeak.Add(ProcessFrameMode1(ref bmp));
+                        else if (mode == 2)
+                            ProcessFrameMode2(ref bmp);
 
                         Console.Write(Math.Round((float)f * 100.0 / vfr.FrameCount, 2) + "%");
                         Console.CursorLeft = 11;
@@ -59,19 +80,44 @@ namespace FollowSpotlight
                     Console.CursorTop++;
                     Console.CursorLeft = 0;
                 }
-            }
 
-            outputs.ForEach(x => Console.WriteLine(x.Item1 + "\t" + x.Item2));
+                if (mode == 1)
+                {
+                    string dump = "deltax(px) " + (avgPeak.Max(x => x.X) - avgPeak.Min(x => x.X)) + Environment.NewLine;
+                    dump += "deltay(px) " + (avgPeak.Max(x => x.Y) - avgPeak.Min(x => x.Y)) + Environment.NewLine;
+                    Console.WriteLine(dump);
+                    dump += string.Join(Environment.NewLine, avgPeak.Select(x => x.X + " " + x.Y));
+                    string path = Path.GetDirectoryName(input) + Path.GetFileNameWithoutExtension(input) + ".txt";
+                    File.WriteAllText(path, dump);
+                }
+                else if (mode == 2)
+                {
+                    peak.ForEach(x => Console.WriteLine(x));
+                    string dump = string.Join(Environment.NewLine, peak);
+                    string path = Path.GetDirectoryName(input) + "\\" + Path.GetFileNameWithoutExtension(input) + ".txt";
+                    File.WriteAllText(path, dump);
+                }
+            }
 
             return 0;
         }
 
-        private static double ProcessFrameMode2(ref Bitmap bmp)
+        private static Point ProcessFrameMode1(ref Bitmap bmp)
+        {
+            List<Tuple<double, Point>> points = GetLightness(ref bmp);
+            double avgBright = points.Average(x => x.Item1);
+            List<Point> pointsAbove = points.Where(x => x.Item1 > avgBright).Select(x => x.Item2).ToList();
+
+            int avgX = (int)pointsAbove.Average(x => (double)x.X);
+            int avgY = (int)pointsAbove.Average(x => (double)x.Y);
+            return new Point(avgX, avgY);
+        }
+
+        private static void ProcessFrameMode2(ref Bitmap bmp)
         {
             //workaround to loose information from 24bpp to 4bpp
-            bmp = bmp
-                .Clone(new Rectangle(0, 0, bmp.Width, bmp.Height), PixelFormat.Format4bppIndexed)
-                .Clone(new Rectangle(0, 0, bmp.Width, bmp.Height), PixelFormat.Format24bppRgb);
+            bmp = bmp.Clone(new Rectangle(0, 0, bmp.Width, bmp.Height), PixelFormat.Format4bppIndexed);
+            bmp = bmp.Clone(new Rectangle(0, 0, bmp.Width, bmp.Height), PixelFormat.Format24bppRgb);
 
             //get points above the average
             List<Tuple<double, Point>> points = GetLightness(ref bmp);
@@ -87,15 +133,22 @@ namespace FollowSpotlight
             Bitmap tmp = new Bitmap(xMax - xMin + 3, yMax - yMin + 3);
             Graphics.FromImage(tmp).FillRectangle(new SolidBrush(Color.White), 0, 0, tmp.Width, tmp.Height);
             pointsAbove.ForEach(x => tmp.SetPixel(x.X + 1, x.Y + 1, Color.Black));
+            int S = pointsAbove.Count;
 
             //get borders of the points above
             List<Point> border = GetBorder(ref tmp);
             xMax = border.Max(x => x.X);
+            xMin = border.Min(x => x.X);
             yMax = border.Max(x => x.Y);
+            yMin = border.Min(x => x.Y);
             tmp = new Bitmap(xMax + 3, yMax + 3);
             Graphics.FromImage(tmp).FillRectangle(new SolidBrush(Color.White), 0, 0, tmp.Width, tmp.Height);
             border.ForEach(x => tmp.SetPixel(x.X + 1, x.Y + 1, Color.Black));
+            tmp.Save("border.bmp");
 
+            double middle = border.Average(x => (double)x.X);
+            List<Point> up = border.Where(x => x.Y < tmp.Height / 2).ToList();
+            List<Point> down = border.Where(x => x.Y >= tmp.Height / 2).ToList();
             List<Point> left = border.Where(x => x.X < tmp.Width / 2).ToList();
             List<Point> right = border.Where(x => x.X >= tmp.Width / 2).ToList();
             List<Point> uLeft = new List<Point>();
@@ -111,17 +164,16 @@ namespace FollowSpotlight
                     uRight.Add(new Point((int)or.Average(x => (double)x.X), (int)or.Average(x => (double)x.Y)));
             }
 
-            uRight.Reverse();
             List<Point> merge = new List<Point>(uLeft);
+            uRight.Reverse();
             merge.AddRange(uRight);
-            string str = "data={" + string.Join(", ", merge.Select(x => "{" + x.X + ", " + x.Y + "}")) + "};";
-            str += Environment.NewLine + @"ar := Area[Polygon[data]]
-per := N[Perimeter[Polygon[data]]]
-res := NSolve[{ar == r (Pi r + 2 h), per == 2 (h + Pi r)}, {h, r}, Reals]
-h /. res[[1]][[1]]";
-            string output = wolf.Wolf(str).Replace('.', ',');
+            string str = "data={" + string.Join(", ", merge.Select(x => "{" + x.X + ", " + x.Y + "}")) + "}";
+            wolf.Wolf("");
 
-            return double.Parse(output);
+            tmp = new Bitmap(xMax + 3, yMax + 3);
+            Graphics.FromImage(tmp).FillRectangle(new SolidBrush(Color.White), 0, 0, tmp.Width, tmp.Height);
+            merge.ForEach(x => tmp.SetPixel(x.X + 1, x.Y + 1, Color.Black));
+            tmp.Save("border2.bmp");
         }
 
         public static List<Tuple<double, Point>> GetLightness(ref Bitmap img)
