@@ -10,3 +10,11 @@
 /FollowSpotlight/bin/Debug
 /FollowSpotlight/obj
 /FollowSpotlight/bin/Release
+/chess/x64/Debug
+/chess/x64/Debug
+/chess/x64/Debug/chess.tlog
+/x64/Debug
+/chess/x64/Debug
+/chess/x64/Release
+/x64/Release
+*.user
