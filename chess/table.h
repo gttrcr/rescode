@@ -137,7 +137,7 @@ public:
 
         switch (p.piece::get_value())
         {
-        case piece::value::pawn:  //something wrong
+        case piece::value::pawn:  //something wrong?
         {
             if (p.get_color() == piece::color::white)
             {
@@ -340,7 +340,7 @@ public:
 
         switch (p.piece::get_value())
         {
-        case piece::value::pawn:  //something wrong
+        case piece::value::pawn:  //something wrong?
         {
             if (p.get_color() == piece::color::white)
             {
@@ -423,12 +423,116 @@ public:
         break;
         case piece::value::bishop:
         {
+            //free movement
+            char pos_x = x;
+            unsigned int pos_y = y;
+            while (what_is(++pos_x, ++pos_y) == freedom::available);
 
+            //eat something
+            if (what_is(pos_x, pos_y) == freedom::busy && get(pos_x, pos_y, is_out).get_color() != p.get_color())
+                ret.push_back(std::make_tuple(position(pos_x, pos_y), get(pos_x, pos_y, is_out)));
+
+            //free movement
+            pos_x = x;
+            pos_y = y;
+            while (what_is(--pos_x, --pos_y) == freedom::available);
+
+            //eat something
+            if (what_is(pos_x, pos_y) == freedom::busy && get(pos_x, pos_y, is_out).get_color() != p.get_color())
+                ret.push_back(std::make_tuple(position(pos_x, pos_y), get(pos_x, pos_y, is_out)));
+
+            //free movement
+            pos_x = x;
+            pos_y = y;
+            while (what_is(++pos_x, --pos_y) == freedom::available);
+
+            //eat something
+            if (what_is(pos_x, pos_y) == freedom::busy && get(pos_x, pos_y, is_out).get_color() != p.get_color())
+                ret.push_back(std::make_tuple(position(pos_x, pos_y), get(pos_x, pos_y, is_out)));
+
+            //free movement
+            pos_x = x;
+            pos_y = y;
+            while (what_is(--pos_x, ++pos_y) == freedom::available);
+
+            //eat something
+            if (what_is(pos_x, pos_y) == freedom::busy && get(pos_x, pos_y, is_out).get_color() != p.get_color())
+                ret.push_back(std::make_tuple(position(pos_x, pos_y), get(pos_x, pos_y, is_out)));
         }
         break;
         case piece::value::queen:
         {
+            //free movement
+            char pos_x = x;
+            unsigned int pos_y = y;
+            while (what_is(++pos_x, pos_y) == freedom::available);
 
+            //eat something
+            if (what_is(pos_x, pos_y) == freedom::busy && get(pos_x, pos_y, is_out).get_color() != p.get_color())
+                ret.push_back(std::make_tuple(position(pos_x, pos_y), get(pos_x, pos_y, is_out)));
+
+            //free movement
+            pos_x = x;
+            pos_y = y;
+            while (what_is(--pos_x, pos_y) == freedom::available);
+
+            //eat something
+            if (what_is(pos_x, pos_y) == freedom::busy && get(pos_x, pos_y, is_out).get_color() != p.get_color())
+                ret.push_back(std::make_tuple(position(pos_x, pos_y), get(pos_x, pos_y, is_out)));
+
+            //free movement
+            pos_x = x;
+            pos_y = y;
+            while (what_is(pos_x, ++pos_y) == freedom::available);
+
+            //eat something
+            if (what_is(pos_x, pos_y) == freedom::busy && get(pos_x, pos_y, is_out).get_color() != p.get_color())
+                ret.push_back(std::make_tuple(position(pos_x, pos_y), get(pos_x, pos_y, is_out)));
+
+            //free movement
+            pos_x = x;
+            pos_y = y;
+            while (what_is(pos_x, --pos_y) == freedom::available);
+
+            //eat something
+            if (what_is(pos_x, pos_y) == freedom::busy && get(pos_x, pos_y, is_out).get_color() != p.get_color())
+                ret.push_back(std::make_tuple(position(pos_x, pos_y), get(pos_x, pos_y, is_out)));
+
+            //free movement
+            pos_x = x;
+            pos_y = y;
+            while (what_is(++pos_x, ++pos_y) == freedom::available);
+
+            //eat something
+            if (what_is(pos_x, pos_y) == freedom::busy && get(pos_x, pos_y, is_out).get_color() != p.get_color())
+                ret.push_back(std::make_tuple(position(pos_x, pos_y), get(pos_x, pos_y, is_out)));
+
+            //free movement
+            pos_x = x;
+            pos_y = y;
+            while (what_is(--pos_x, --pos_y) == freedom::available);
+
+            //eat something
+            if (what_is(pos_x, pos_y) == freedom::busy && get(pos_x, pos_y, is_out).get_color() != p.get_color())
+                ret.push_back(std::make_tuple(position(pos_x, pos_y), get(pos_x, pos_y, is_out)));
+
+            //free movement
+            pos_x = x;
+            pos_y = y;
+            while (what_is(++pos_x, --pos_y) == freedom::available);
+
+            //eat something
+            if (what_is(pos_x, pos_y) == freedom::busy && get(pos_x, pos_y, is_out).get_color() != p.get_color())
+                ret.push_back(std::make_tuple(position(pos_x, pos_y), get(pos_x, pos_y, is_out)));
+
+            //free movement
+            pos_x = x;
+            pos_y = y;
+            while (what_is(--pos_x, ++pos_y) == freedom::available);
+
+            //eat something
+            if (what_is(pos_x, pos_y) == freedom::busy && get(pos_x, pos_y, is_out).get_color() != p.get_color())
+                ret.push_back(std::make_tuple(position(pos_x, pos_y), get(pos_x, pos_y, is_out)));
         }
         break;
         case piece::value::king:

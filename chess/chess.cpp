@@ -7,7 +7,7 @@
 #include "piece.h"
 #include "table.h"
 
-#define MAX_TEST 10000000
+#define MAX_TEST 5000000
 
 //complexity n(n+1)/2 => O(n^2)
 void execute_test_v1(unsigned int max_test)
