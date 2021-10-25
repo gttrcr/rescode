@@ -103,9 +103,9 @@ void execute_test_v2(unsigned int max_test)
     average.push_back(std::make_tuple(piece(piece::value::pawn, piece::color::white), 0, 0, 0, std::tuple<unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int>()));
     average.push_back(std::make_tuple(piece(piece::value::rook, piece::color::white), 0, 0, 0, std::tuple<unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int>()));
     average.push_back(std::make_tuple(piece(piece::value::knight, piece::color::white), 0, 0, 0, std::tuple<unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int>()));
-    average.push_back(std::make_tuple(piece(piece::value::pawn, piece::color::black), 0, 0, 0, std::tuple<unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int>()));
-    average.push_back(std::make_tuple(piece(piece::value::rook, piece::color::black), 0, 0, 0, std::tuple<unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int>()));
-    average.push_back(std::make_tuple(piece(piece::value::knight, piece::color::black), 0, 0, 0, std::tuple<unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int>()));
+    average.push_back(std::make_tuple(piece(piece::value::bishop, piece::color::white), 0, 0, 0, std::tuple<unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int>()));
+    average.push_back(std::make_tuple(piece(piece::value::king, piece::color::white), 0, 0, 0, std::tuple<unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int>()));
+    average.push_back(std::make_tuple(piece(piece::value::queen, piece::color::white), 0, 0, 0, std::tuple<unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int>()));
 
     std::string str = "";
     for (unsigned int i = 1; i <= max_test; i++)
