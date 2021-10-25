@@ -18,7 +18,7 @@ private:
         busy
     };
 
-    void set(char x, unsigned int y, piece::value pr = piece::value::empty_price, piece::color c = piece::color::empty_color)
+    void set(char x, unsigned int y, piece::value pr = piece::value::empty_value, piece::color c = piece::color::empty_color)
     {
         piece p(pr, c);
         _t[x - 'a'][y - 1] = p;
@@ -35,7 +35,7 @@ private:
         piece p = get(x, y, is_out);
         if (is_out)
             return freedom::out;
-        if (p.get_color() == piece::color::empty_color || p.piece::get_value() == piece::value::empty_price)
+        if (p.get_color() == piece::color::empty_color && p.piece::get_value() == piece::value::empty_value)
             return freedom::available;
         return freedom::busy;
     }
@@ -94,7 +94,7 @@ public:
     {
         int x_int = x - 'a';
         int y_int = y - 1;
-        if (x_int < 0 || x_int > 8 || y_int < 0 || y_int > 8)
+        if (x_int < 0 || x_int > 7 || y_int < 0 || y_int > 7)
         {
             is_out = true;
             return piece();
@@ -143,17 +143,21 @@ public:
             {
                 //free movement
                 if (what_is(x, y + 1) == freedom::available)
+                {
                     ret.push_back(position(x, y + 1));
-                if (what_is(x, y + 2) == freedom::available)
-                    ret.push_back(position(x, y + 2));
+                    if (what_is(x, y + 2) == freedom::available)
+                        ret.push_back(position(x, y + 2));
+                }
             }
             else if (p.get_color() == piece::color::black)
             {
                 //free movement
                 if (what_is(x, y - 1) == freedom::available)
+                {
                     ret.push_back(position(x, y - 1));
-                if (what_is(x, y - 2) == freedom::available)
-                    ret.push_back(position(x, y - 2));
+                    if (what_is(x, y - 2) == freedom::available)
+                        ret.push_back(position(x, y - 2));
+                }
             }
         }
         break;

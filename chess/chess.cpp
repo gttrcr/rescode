@@ -117,15 +117,10 @@ void execute_test_v2(unsigned int max_test)
             unsigned int pos = (unsigned int)(t.available_positions(std::get<1>(dist[d])).size());
             std::vector<std::tuple<position, piece>> av_cap = t.available_captures(std::get<1>(dist[d]));
             unsigned int cap = (unsigned int)(av_cap.size());
-            unsigned int count = 0;
-            for (unsigned int t = 0; t < dist.size(); t++)
-                if (std::get<0>(dist[d]) == std::get<0>(dist[t]))
-                    count++;
-
             for (unsigned int r = 0; r < average.size(); r++)
                 if (std::get<0>(average[r]) == std::get<0>(dist[d]))
                 {
-                    std::get<1>(average[r]) += count;
+                    std::get<1>(average[r]) += 1;
                     std::get<2>(average[r]) += pos;
                     std::get<3>(average[r]) += cap;
                     for (unsigned int av = 0; av < av_cap.size(); av++)
@@ -168,7 +163,6 @@ void execute_test_v2(unsigned int max_test)
         if ((i % 10000) == 0)
         {
             std::cout << "         \r" << (double)i / (double)max_test;
-            //std::ofstream outfile;
             outfile.open("output.txt", std::ios_base::app);
             outfile << str;
             outfile.close();
@@ -179,7 +173,6 @@ void execute_test_v2(unsigned int max_test)
 
 int main()
 {
-    //this execute tests from 1 to MAX_TEST
     execute_test_v2(MAX_TEST);
 
     getchar();

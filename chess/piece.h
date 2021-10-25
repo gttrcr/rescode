@@ -5,7 +5,7 @@ class piece
 public:
     enum value
     {
-        empty_price,
+        empty_value,
         pawn,
         rook,
         knight,
@@ -26,7 +26,7 @@ private:
     color _color;
 
 public:
-    piece(value price = value::empty_price, color color = color::empty_color)
+    piece(value price = value::empty_value, color color = color::empty_color)
     {
         _price = price;
         _color = color;
