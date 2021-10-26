@@ -581,6 +581,11 @@ public:
         return ret;
     }
 
+    void move(position p1, position p2)
+    {
+        move(p1.get_col(), p1.get_row(), p2.get_col(), p2.get_row());
+    }
+
     void move(char x_i, unsigned int y_i, char x_f, unsigned int y_f, bool check = true)
     {
         bool is_out;
@@ -677,7 +682,7 @@ public:
         }
     }
 
-    std::vector<std::tuple<piece, position>> pieces()
+    std::vector<std::tuple<piece, position>> pieces(piece::color color = piece::color::empty_color)
     {
         std::vector<std::tuple<piece, position>> ret;
         for (char x = 'a'; x < 'i'; x++)
@@ -685,7 +690,13 @@ public:
             {
                 bool is_out;
                 if (what_is(x, y) == freedom::busy)
-                    ret.push_back(std::make_tuple(get(x, y, is_out), position(x, y)));
+                {
+                    piece p = get(x, y, is_out);
+                    if (color != piece::color::empty_color && p.get_color() == color)
+                        ret.push_back(std::make_tuple(p, position(x, y)));
+                    else if (color == piece::color::empty_color)
+                        ret.push_back(std::make_tuple(p, position(x, y)));
+                }
             }
 
         return ret;

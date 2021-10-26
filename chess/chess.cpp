@@ -7,78 +7,8 @@
 #include "piece.h"
 #include "table.h"
 
-#define MAX_TEST 5000000
-
-//complexity n(n+1)/2 => O(n^2)
-void execute_test_v1(unsigned int max_test)
-{
-    table t;
-    std::vector<std::tuple<piece, double, double>> average;
-    average.push_back(std::make_tuple(piece(piece::value::pawn, piece::color::white), 0.0, 0.0));
-    average.push_back(std::make_tuple(piece(piece::value::pawn, piece::color::black), 0.0, 0.0));
-    average.push_back(std::make_tuple(piece(piece::value::rook, piece::color::white), 0.0, 0.0));
-    average.push_back(std::make_tuple(piece(piece::value::rook, piece::color::black), 0.0, 0.0));
-    average.push_back(std::make_tuple(piece(piece::value::knight, piece::color::white), 0.0, 0.0));
-    average.push_back(std::make_tuple(piece(piece::value::knight, piece::color::black), 0.0, 0.0));
-
-    std::string str = "";
-    for (unsigned int max_t = 0; max_t < max_test; max_t += 100)
-    {
-        for (unsigned int r = 0; r < average.size(); r++)
-        {
-            std::get<1>(average[r]) = 0.0;
-            std::get<2>(average[r]) = 0.0;
-        }
-
-        for (unsigned int i = 0; i < max_t; i++)
-        {
-            t.random();
-            std::vector<std::tuple<piece, position>> dist = t.pieces();
-            for (unsigned int d = 0; d < dist.size(); d++)
-            {
-                double pos = (double)(t.available_positions(std::get<1>(dist[d])).size());
-                double cap = (double)(t.available_captures(std::get<1>(dist[d])).size());
-                double count = 0.0;
-                for (unsigned int t = 0; t < dist.size(); t++)
-                    if (std::get<0>(dist[d]) == std::get<0>(dist[t]))
-                        count++;
-                pos /= count;
-                cap /= count;
-
-                for (unsigned int r = 0; r < average.size(); r++)
-                    if (std::get<0>(average[r]) == std::get<0>(dist[d]))
-                    {
-                        std::get<1>(average[r]) += pos;
-                        std::get<2>(average[r]) += cap;
-                    }
-            }
-        }
-
-        std::string tmp = std::to_string(max_t) + " ";
-        for (unsigned int r = 0; r < average.size(); r++)
-        {
-            piece p = std::get<0>(average[r]);
-            double avg_pos = std::get<1>(average[r]) / (double)(max_t);
-            double avg_cap = std::get<2>(average[r]) / (double)(max_t);
-            tmp += std::to_string(p.get_color()) + std::to_string(p.get_value()) + " " + std::to_string(avg_pos) + " " + std::to_string(avg_cap) + " ";
-        }
-        //std::cout << tmp << std::endl;
-        str += tmp + "\n";
-
-        if ((max_t % 5000) == 0)
-        {
-            std::cout << max_t << "/" << max_test << std::endl;
-            std::ofstream outfile;
-            outfile.open("output.txt", std::ios_base::app);
-            outfile << str;
-            outfile.close();
-            str = "";
-        }
-    }
-}
-
 //complexity O(n)
-void execute_test_v2(unsigned int max_test)
+void test_av_cap(unsigned int max_test)
 {
     std::ofstream outfile;
     outfile.open("output.txt", std::ios_base::out | std::ios_base::trunc);
@@ -171,9 +101,108 @@ void execute_test_v2(unsigned int max_test)
     }
 }
 
+void test_match_duration(unsigned int max_test)
+{
+    std::random_device dev;
+    std::mt19937 rng(dev());
+    piece w_queen = piece(piece::value::queen, piece::color::white);
+    piece b_queen = piece(piece::value::queen, piece::color::black);
+    for (unsigned int i = 0; i < max_test; i++)
+    {
+        table t;
+        bool w_go_on = false;
+        bool b_go_on = false;
+        unsigned int count = 0;
+        do
+        {
+
+            //white moves
+            std::tuple<piece, position> pp = std::make_tuple(piece(), position());
+            std::vector<position> av_pos;
+            std::vector<std::tuple<position, piece>> av_cap;
+            std::vector<std::tuple<piece, position>> dist = t.pieces(piece::color::white);
+            do
+            {
+                std::uniform_int_distribution<std::mt19937::result_type> rnd_dist(0, dist.size() - 1);  //select a random element from dist
+                pp = dist[rnd_dist(rng)];
+                av_pos = t.available_positions(std::get<1>(pp));
+                av_cap = t.available_captures(std::get<1>(pp));
+            } while (av_pos.size() == 0 && av_cap.size() == 0);
+
+            position sel_position;
+
+            //obligation to capture
+            if (av_cap.size() != 0)
+            {
+                std::uniform_int_distribution<std::mt19937::result_type> rnd_av_cap(0, av_cap.size() - 1);  //select a random element from av_cap
+                t.move(std::get<1>(pp), std::get<0>(av_cap[rnd_av_cap(rng)]));
+            }
+            else if (av_pos.size() != 0)
+            {
+                std::uniform_int_distribution<std::mt19937::result_type> rnd_av_pos(0, av_pos.size() - 1);  //select a random element from av_pos
+                t.move(std::get<1>(pp), av_pos[rnd_av_pos(rng)]);
+            }
+            //t.draw();
+
+            //check mate
+            w_go_on = false;
+            b_go_on = false;
+            dist = t.pieces();
+            for (unsigned int d = 0; d < dist.size(); d++)
+            {
+                if (std::get<0>(dist[d]) == w_queen)
+                    w_go_on = true;
+                if (std::get<0>(dist[d]) == b_queen)
+                    b_go_on = true;
+            }
+            if (!w_go_on || !b_go_on)
+                break;
+
+            //black moves
+            pp = std::make_tuple(piece(), position());
+            dist = t.pieces(piece::color::black);
+            do
+            {
+                std::uniform_int_distribution<std::mt19937::result_type> rnd_dist(0, dist.size() - 1);  //select a random element from dist
+                pp = dist[rnd_dist(rng)];
+                av_pos = t.available_positions(std::get<1>(pp));
+                av_cap = t.available_captures(std::get<1>(pp));
+            } while (av_pos.size() == 0 && av_cap.size() == 0);
+
+            //obligation to capture
+            if (av_cap.size() != 0)
+            {
+                std::uniform_int_distribution<std::mt19937::result_type> rnd_av_cap(0, av_cap.size() - 1);  //select a random element from av_cap
+                t.move(std::get<1>(pp), std::get<0>(av_cap[rnd_av_cap(rng)]));
+            }
+            else if (av_pos.size() != 0)
+            {
+                std::uniform_int_distribution<std::mt19937::result_type> rnd_av_pos(0, av_pos.size() - 1);  //select a random element from av_pos
+                t.move(std::get<1>(pp), av_pos[rnd_av_pos(rng)]);
+            }
+            //t.draw();
+
+            w_go_on = false;
+            b_go_on = false;
+            dist = t.pieces();
+            for (unsigned int d = 0; d < dist.size(); d++)
+            {
+                if (std::get<0>(dist[d]) == w_queen)
+                    w_go_on = true;
+                if (std::get<0>(dist[d]) == b_queen)
+                    b_go_on = true;
+            }
+            count++;
+        } while (w_go_on && b_go_on);
+
+        std::cout << count << ",";
+    }
+}
+
 int main()
 {
-    execute_test_v2(MAX_TEST);
+    //test_av_cap(5000000);
+    test_match_duration(100000);
 
     getchar();
     getchar();

@@ -7,6 +7,12 @@ private:
 	unsigned int _row;
 
 public:
+	position()
+	{
+		_col = 'a';
+		_row = 1;
+	}
+	
 	position(char col, unsigned int row)
 	{
 		_col = col;
