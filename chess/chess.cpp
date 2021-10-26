@@ -92,7 +92,7 @@ void test_av_cap(unsigned int max_test)
 
         if ((i % 10000) == 0)
         {
-            std::cout << "         \r" << (double)i / (double)max_test;
+            std::cout << "         \r" << (double)i * 100.0 / (double)max_test << "%\r";
             outfile.open("test_av_cap.txt", std::ios_base::app);
             outfile << str;
             outfile.close();
@@ -107,7 +107,7 @@ void test_match_duration(unsigned int max_test)
     std::ofstream outfile;
     outfile.open("test_match_duration.txt", std::ios_base::out | std::ios_base::trunc);
     outfile.close();
-    
+
     std::random_device dev;
     std::mt19937 rng(dev());
     piece w_queen = piece(piece::value::queen, piece::color::white);
@@ -133,20 +133,18 @@ void test_match_duration(unsigned int max_test)
                 av_cap = t.available_captures(std::get<1>(pp));
             } while (av_pos.size() == 0 && av_cap.size() == 0);
 
-            position sel_position;
-
-            //obligation to capture
-            if (av_cap.size() != 0)
-            {
-                std::uniform_int_distribution<std::mt19937::result_type> rnd_av_cap(0, av_cap.size() - 1);  //select a random element from av_cap
-                t.move(std::get<1>(pp), std::get<0>(av_cap[rnd_av_cap(rng)]));
-            }
-            else if (av_pos.size() != 0)
+            std::uniform_int_distribution<std::mt19937::result_type> rnd_choice(0, 1);  //select a random from pos and cap
+            unsigned int choice = rnd_choice(rng);
+            if ((choice == 0 && av_pos.size() != 0) || av_cap.size() == 0)
             {
                 std::uniform_int_distribution<std::mt19937::result_type> rnd_av_pos(0, av_pos.size() - 1);  //select a random element from av_pos
                 t.move(std::get<1>(pp), av_pos[rnd_av_pos(rng)]);
             }
-            //t.draw();
+            else if ((choice == 1 && av_cap.size() != 0) || av_pos.size() == 0)
+            {
+                std::uniform_int_distribution<std::mt19937::result_type> rnd_av_cap(0, av_cap.size() - 1);  //select a random element from av_cap
+                t.move(std::get<1>(pp), std::get<0>(av_cap[rnd_av_cap(rng)]));
+            }
 
             //check mate
             w_go_on = false;
@@ -173,19 +171,19 @@ void test_match_duration(unsigned int max_test)
                 av_cap = t.available_captures(std::get<1>(pp));
             } while (av_pos.size() == 0 && av_cap.size() == 0);
 
-            //obligation to capture
-            if (av_cap.size() != 0)
-            {
-                std::uniform_int_distribution<std::mt19937::result_type> rnd_av_cap(0, av_cap.size() - 1);  //select a random element from av_cap
-                t.move(std::get<1>(pp), std::get<0>(av_cap[rnd_av_cap(rng)]));
-            }
-            else if (av_pos.size() != 0)
+            choice = rnd_choice(rng);
+            if ((choice == 0 && av_pos.size() != 0) || av_cap.size() == 0)
             {
                 std::uniform_int_distribution<std::mt19937::result_type> rnd_av_pos(0, av_pos.size() - 1);  //select a random element from av_pos
                 t.move(std::get<1>(pp), av_pos[rnd_av_pos(rng)]);
             }
-            //t.draw();
+            else if ((choice == 1 && av_cap.size() != 0) || av_pos.size() == 0)
+            {
+                std::uniform_int_distribution<std::mt19937::result_type> rnd_av_cap(0, av_cap.size() - 1);  //select a random element from av_cap
+                t.move(std::get<1>(pp), std::get<0>(av_cap[rnd_av_cap(rng)]));
+            }
 
+            //check mate
             w_go_on = false;
             b_go_on = false;
             dist = t.pieces();
@@ -199,9 +197,9 @@ void test_match_duration(unsigned int max_test)
             count++;
         } while (w_go_on && b_go_on);
 
-        str += std::to_string(count) + ",";
+        str += std::to_string(count) + "\n";
         if ((i % 1000) == 0)
-            std::cout << "         \r" << (double)i / (double)max_test;
+            std::cout << "         \r" << (double)i * 100.0 / (double)max_test << "%\r";
     }
 
     outfile.open("test_match_duration.txt", std::ios_base::app);
@@ -211,9 +209,6 @@ void test_match_duration(unsigned int max_test)
 
 int main()
 {
-    //test_av_cap(5000000);
-    test_match_duration(100000);
-
-    getchar();
-    getchar();
+    test_av_cap(10000000);
+    test_match_duration(10000000);
 }
