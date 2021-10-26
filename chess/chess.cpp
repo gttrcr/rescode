@@ -11,7 +11,7 @@
 void test_av_cap(unsigned int max_test)
 {
     std::ofstream outfile;
-    outfile.open("output.txt", std::ios_base::out | std::ios_base::trunc);
+    outfile.open("test_av_cap.txt", std::ios_base::out | std::ios_base::trunc);
     outfile.close();
 
     table t;
@@ -93,7 +93,7 @@ void test_av_cap(unsigned int max_test)
         if ((i % 10000) == 0)
         {
             std::cout << "         \r" << (double)i / (double)max_test;
-            outfile.open("output.txt", std::ios_base::app);
+            outfile.open("test_av_cap.txt", std::ios_base::app);
             outfile << str;
             outfile.close();
             str = "";
@@ -103,11 +103,16 @@ void test_av_cap(unsigned int max_test)
 
 void test_match_duration(unsigned int max_test)
 {
+    std::string str = "";
+    std::ofstream outfile;
+    outfile.open("test_match_duration.txt", std::ios_base::out | std::ios_base::trunc);
+    outfile.close();
+    
     std::random_device dev;
     std::mt19937 rng(dev());
     piece w_queen = piece(piece::value::queen, piece::color::white);
     piece b_queen = piece(piece::value::queen, piece::color::black);
-    for (unsigned int i = 0; i < max_test; i++)
+    for (unsigned int i = 1; i <= max_test; i++)
     {
         table t;
         bool w_go_on = false;
@@ -115,7 +120,6 @@ void test_match_duration(unsigned int max_test)
         unsigned int count = 0;
         do
         {
-
             //white moves
             std::tuple<piece, position> pp = std::make_tuple(piece(), position());
             std::vector<position> av_pos;
@@ -195,8 +199,14 @@ void test_match_duration(unsigned int max_test)
             count++;
         } while (w_go_on && b_go_on);
 
-        std::cout << count << ",";
+        str += std::to_string(count) + ",";
+        if ((i % 1000) == 0)
+            std::cout << "         \r" << (double)i / (double)max_test;
     }
+
+    outfile.open("test_match_duration.txt", std::ios_base::app);
+    outfile << str;
+    outfile.close();
 }
 
 int main()
