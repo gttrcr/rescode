@@ -18,3 +18,5 @@
 /chess/x64/Release
 /x64/Release
 *.user
+/MMGs/bin
+/MMGs/obj
