@@ -1,0 +1,127 @@
+ClearAll["Global`*"]
+
+(*normalizes a square matrix or a vector so that its columns sum to 1 \
+for every row*)
+NormalizeRows[matrix_?SquareMatrixQ] := 
+ FullSimplifyForPositiveReals[
+  Normal[If[Total[#] == 0, #, #/Total[#]] & /@ matrix]]
+NormalizeVector[vector_?VectorQ] := vector/Total[vector]
+
+(*check if a matrix or a vector is row-wise normalized*)
+NormalizeRowsQ[matrix_?SquareMatrixQ] := 
+ FullSimplifyForPositiveReals[((Times @@ #) Total[#] & /@ 
+     matrix) == ((Times @@ #) & /@ matrix)]
+NormalizeVectorQ[vector_?VectorQ] := 
+ FullSimplifyForPositiveReals[Total[vector] == 1]
+
+(*compute the stationary vector for the i-th eigenvalue of a \
+transition matrix*)
+StationaryVector[matrix_?NormalizeRowsQ, i_?IntegerQ] := 
+ Block[{matrixT, known\[Lambda], \[Lambda]List, vList, eigenvect},
+  matrixT = Transpose[matrix];
+  known\[Lambda] = Eigenvalues[matrixT];
+  {\[Lambda]List, vList} = Eigensystem[matrixT];
+  eigenvect = 
+   First@NullSpace[
+     matrixT - 
+      known\[Lambda][[i]] IdentityMatrix[
+        matrixT // Dimensions // First]];
+  FullSimplifyForPositiveReals[
+   Abs[#] & /@ (eigenvect/Total[eigenvect])]
+  ]
+
+(*compute the stationary vector for the first eigenvector of a \
+transition matrix: stationary vector*)
+StationaryVector[matrix_?NormalizeRowsQ] := StationaryVector[matrix, 1]
+
+(*compute the entropy of a stationary vector or any normalized vector*)
+
+ProcessEntropy[
+  sv_?NormalizeVectorQ] := -Total[# Log[#] & /@ 
+    DeleteCases[Chop[sv], 0, Infinity]]
+
+(*simplifies an expression by assuming that all variables are \
+PositiveReal*)
+FullSimplifyForPositiveReals[expression_] := 
+ FullSimplify[expression, 
+  Assumptions -> (# \[Element] PositiveReals & /@ (Variables@
+       Level[expression, {-1}]))]
+
+(*compute the weighted adjacency matrix of the union of two adjacency \
+matrices*)
+WeightedUnionAdjacencyMatrix[gr1WAM_?SquareMatrixQ, 
+  gr2WAM_?SquareMatrixQ] := Block[{targetDim, smallDim, gr1WAMFilled},
+  targetDim = 
+   First[DeleteDuplicates[
+     MapThread[Max, {Dimensions[gr1WAM], Dimensions[gr2WAM]}]]];
+  smallDim = 
+   First[DeleteDuplicates[
+     MapThread[Min, {Dimensions[gr1WAM], Dimensions[gr2WAM]}]]];
+  gr1WAMFilled = 
+   ArrayReshape[
+    Insert[(Flatten[#] & /@ (Insert[#, 
+           ConstantArray[0, targetDim - smallDim], -1] & /@ gr1WAM)), 
+     ConstantArray[ConstantArray[0, targetDim], 
+      targetDim - smallDim], -1], {targetDim, targetDim}];
+  gr1WAMFilled + gr2WAM
+  ]
+
+(*compute the weighted adjacency graph of the union of two graphs*)
+WeightedUnionAdjacencyGraph[gr1_?GraphQ, gr2_?GraphQ, 
+  options__ : Null] := Block[{gr1WAM, gr2WAM, vertex}, 
+  gr1WAM = Normal[WeightedAdjacencyMatrix[gr1]];
+  gr2WAM = Normal[WeightedAdjacencyMatrix[gr2]];
+  vertex = 
+   DeleteDuplicates[Flatten[Append[VertexList[gr1], VertexList[gr2]]]];
+  WeightedAdjacencyGraph[vertex, 
+   WeightedUnionAdjacencyMatrix[gr1WAM, gr2WAM], options]
+  ]
+
+(*compute the weighted adjacency matrix of the intersection of two \
+adjacency matrices*)
+WeightedIntersectionAdjacencyMatrix[gr1WAM_?SquareMatrixQ, 
+  gr2WAM_?SquareMatrixQ] := Block[{targetDim, smallDim, gr1WAMFilled},
+  targetDim = 
+   First[DeleteDuplicates[
+     MapThread[Max, {Dimensions[gr1WAM], Dimensions[gr2WAM]}]]];
+  smallDim = 
+   First[DeleteDuplicates[
+     MapThread[Min, {Dimensions[gr1WAM], Dimensions[gr2WAM]}]]];
+  gr1WAMFilled = 
+   ArrayReshape[
+    Insert[(Flatten[#] & /@ (Insert[#, 
+           ConstantArray[0, targetDim - smallDim], -1] & /@ gr1WAM)), 
+     ConstantArray[ConstantArray[0, targetDim], 
+      targetDim - smallDim], -1], {targetDim, targetDim}];
+  ArrayReshape[
+   MapThread[
+    Min, {Flatten[gr1WAMFilled], Flatten[gr2WAM]}], {targetDim, 
+    targetDim}]
+  ]
+
+(*compute the weighted adjacency graph of the intersection of two \
+graphs*)
+WeightedIntersectionAdjacencyGraph[gr1_?GraphQ, gr2_?GraphQ, 
+  options__ : Null] := Block[{gr1WAM, gr2WAM, vertex},
+  gr1WAM = Normal[WeightedAdjacencyMatrix[gr1]];
+  gr2WAM = Normal[WeightedAdjacencyMatrix[gr2]];
+  vertex = 
+   DeleteDuplicates[Flatten[Append[VertexList[gr1], VertexList[gr2]]]];
+  WeightedAdjacencyGraph[vertex, 
+   WeightedIntersectionAdjacencyMatrix[gr1WAM, gr2WAM], options]
+  ]
+
+ExpandAndReshape[gr_, vertices_] := 
+ Block[{vl, grWAM, positions, reshape, refactMatrix, i, j},
+  vl = VertexList[gr];
+  grWAM = Normal[WeightedAdjacencyMatrix[gr]];
+  positions = Flatten[Position[vertices, #] & /@ vl];
+  reshape = 
+   ArrayReshape[Tuples[positions, 2], {Length[vl], Length[vl], 2}];
+  refactMatrix = Array[0 &, {Length[vertices], Length[vertices]}];
+  For[i = 1, i <= Length[reshape], i++, 
+   For[j = 1, j <= Length[reshape], j++, 
+    refactMatrix[[reshape[[i]][[j]][[1]]]][[reshape[[i]][[j]][[2]]]] =
+      grWAM[[i]][[j]]]];
+  refactMatrix
+  ]

@@ -1,0 +1,84 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 13.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[      2424,         76]
+NotebookOptionsPosition[      2064,         62]
+NotebookOutlinePosition[      2471,         78]
+CellTagsIndexPosition[      2428,         75]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"\[Rho]", "[", "x_", "]"}], ":=", 
+  RowBox[{"A", " ", 
+   RowBox[{"Sin", "[", 
+    RowBox[{"n", " ", 
+     RowBox[{"Pi", "/", "L"}], " ", "x"}], "]"}]}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"\[Mu]", "[", "x_", "]"}], ":=", 
+  RowBox[{"x", "^", "5"}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"Integrate", "[", 
+    RowBox[{
+     RowBox[{"\[Mu]", "[", 
+      RowBox[{"\[Rho]", "[", "x", "]"}], "]"}], ",", " ", 
+     RowBox[{"{", 
+      RowBox[{"x", ",", " ", "0", ",", " ", "L"}], "}"}]}], "]"}], "==", 
+   "1"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"A", "/.", 
+    RowBox[{"Solve", "[", 
+     RowBox[{"%", ",", " ", "A"}], "]"}]}], "//", "Last"}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"\[Rho]", "[", "x", "]"}], "/.", 
+   RowBox[{"A", "->", "%"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{"FullSimplify", "[", 
+  RowBox[{"%", ",", " ", 
+   RowBox[{"Assumptions", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{"n", "\[Element]", "PositiveIntegers"}], "}"}]}]}], 
+  "]"}]}], "Input",
+ CellChangeTimes->{{3.9081061333953457`*^9, 3.908106255721122*^9}, {
+  3.9081062923398113`*^9, 3.9081062988447337`*^9}, {3.9081063471071234`*^9, 
+  3.9081063722343597`*^9}, {3.908106414416055*^9, 3.908106434394484*^9}, {
+  3.908164699313139*^9, 3.9081647155977335`*^9}, {3.9081647905195236`*^9, 
+  3.9081648019582915`*^9}},
+ CellLabel->"In[22]:=",ExpressionUUID->"6e7fe74e-cc40-4a20-b732-14a8a8893e63"]
+},
+WindowSize->{1920., 1011.75},
+WindowMargins->{{-6, Automatic}, {Automatic, -6}},
+FrontEndVersion->"13.0 for Microsoft Windows (64-bit) (February 4, 2022)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"4ac070ab-ff73-449c-9fd1-3241c4bd612e"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[558, 20, 1502, 40, 124, "Input",ExpressionUUID->"6e7fe74e-cc40-4a20-b732-14a8a8893e63"]
+}
+]
+*)
+

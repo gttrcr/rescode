@@ -1,0 +1,25 @@
+n1 = 3;
+n2 = 4;
+Vertices = Table[Subscript[A, i], {i, 1, Max[n1, n2] + 4}];
+chain1 =(*#/Total[#]&/@*)Table[RandomReal[], {i, 1, n1}, {j, 1, n1}];
+chain2 =(*#/Total[#]&/@*)Table[RandomReal[], {i, 1, n2}, {j, 1, n2}];
+ag1 = WeightedAdjacencyGraph[RandomSample[Vertices, n1], chain1, 
+  VertexLabels -> "Name", EdgeLabels -> "EdgeWeight"]
+ag2 = WeightedAdjacencyGraph[RandomSample[Vertices, n2], chain2, 
+  VertexLabels -> "Name", EdgeLabels -> "EdgeWeight"]
+chain1 = ExpandAndReshape[ag1, Vertices];
+chain2 = ExpandAndReshape[ag2, Vertices];
+
+unionchain = WeightedUnionAdjacencyMatrix[chain1, chain2];
+intersectionchain = 
+  WeightedIntersectionAdjacencyMatrix[chain1, chain2];
+WeightedAdjacencyGraph[Vertices, unionchain, VertexLabels -> "Name", 
+ EdgeLabels -> "EdgeWeight"]
+WeightedAdjacencyGraph[Vertices, intersectionchain, 
+ VertexLabels -> "Name", EdgeLabels -> "EdgeWeight"]
+
+chain1 // StationaryVector // NormalizeVector // ProcessEntropy
+chain2 // StationaryVector // NormalizeVector // ProcessEntropy
+unionchain // StationaryVector // NormalizeVector // ProcessEntropy
+intersectionchain // StationaryVector // 
+  NormalizeVector // ProcessEntropy
