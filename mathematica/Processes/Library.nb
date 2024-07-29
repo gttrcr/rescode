@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     31389,        737]
-NotebookOptionsPosition[     30995,        722]
-NotebookOutlinePosition[     31433,        739]
-CellTagsIndexPosition[     31390,        736]
+NotebookDataLength[     32516,        761]
+NotebookOptionsPosition[     32122,        746]
+NotebookOutlinePosition[     32560,        763]
+CellTagsIndexPosition[     32517,        760]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -83,18 +83,16 @@ Cell[BoxData[{
   "\[IndentingNewLine]", "\[IndentingNewLine]", 
   RowBox[{"(*", 
    RowBox[{
-    RowBox[{
-    "compute", " ", "the", " ", "stationary", " ", "vector", " ", "for", " ", 
-     "the", " ", "i"}], "-", 
-    RowBox[{
-    "th", " ", "eigenvalue", " ", "of", " ", "a", " ", "transition", " ", 
-     "matrix"}]}], "*)"}]}], "\[IndentingNewLine]", 
+   "compute", " ", "the", " ", "stationary", " ", "vector", " ", "for", " ", 
+    "the", " ", "first", " ", "eigenvector", " ", "of", " ", "a", " ", 
+    "transition", " ", 
+    RowBox[{"matrix", ":", " ", 
+     RowBox[{"stationary", " ", "vector"}]}]}], 
+   "*)"}]}], "\[IndentingNewLine]", 
  RowBox[{
   RowBox[{
    RowBox[{"StationaryVector", "[", 
-    RowBox[{
-     RowBox[{"matrix_", "?", "NormalizeRowsQ"}], ",", " ", 
-     RowBox[{"i_", "?", "IntegerQ"}]}], "]"}], ":=", 
+    RowBox[{"matrix_", "?", "NormalizeRowsQ"}], "]"}], ":=", 
    RowBox[{"Block", "[", 
     RowBox[{
      RowBox[{"{", 
@@ -106,9 +104,6 @@ Cell[BoxData[{
       RowBox[{"matrixT", "=", 
        RowBox[{"Transpose", "[", "matrix", "]"}]}], ";", 
       "\[IndentingNewLine]", 
-      RowBox[{"known\[Lambda]", "=", 
-       RowBox[{"Eigenvalues", "[", "matrixT", "]"}]}], ";", 
-      "\[IndentingNewLine]", 
       RowBox[{
        RowBox[{"{", 
         RowBox[{"\[Lambda]List", ",", "vList"}], "}"}], "=", 
@@ -118,17 +113,13 @@ Cell[BoxData[{
        RowBox[{"First", "@", 
         RowBox[{"NullSpace", "[", 
          RowBox[{"matrixT", "-", 
-          RowBox[{
-           RowBox[{"known\[Lambda]", "[", 
-            RowBox[{"[", "i", "]"}], "]"}], " ", 
-           RowBox[{"IdentityMatrix", "[", 
-            RowBox[{
-             RowBox[{"matrixT", "//", "Dimensions"}], "//", "First"}], 
-            "]"}]}]}], "]"}]}]}], ";", "\[IndentingNewLine]", 
+          RowBox[{"IdentityMatrix", "[", 
+           RowBox[{
+            RowBox[{"matrixT", "//", "Dimensions"}], "//", "First"}], "]"}]}],
+          "]"}]}]}], ";", "\[IndentingNewLine]", 
       RowBox[{"FullSimplifyForPositiveReals", "[", 
        RowBox[{
-        RowBox[{
-         RowBox[{"Abs", "[", "#", "]"}], "&"}], "/@", 
+        RowBox[{"#", "&"}], "/@", 
         RowBox[{"(", 
          RowBox[{"eigenvect", "/", 
           RowBox[{"Total", "[", "eigenvect", "]"}]}], ")"}]}], "]"}]}]}], 
@@ -136,39 +127,66 @@ Cell[BoxData[{
   "\[IndentingNewLine]", 
   RowBox[{"(*", 
    RowBox[{
-   "compute", " ", "the", " ", "stationary", " ", "vector", " ", "for", " ", 
-    "the", " ", "first", " ", "eigenvector", " ", "of", " ", "a", " ", 
-    "transition", " ", 
-    RowBox[{"matrix", ":", " ", 
-     RowBox[{"stationary", " ", "vector"}]}]}], 
-   "*)"}]}], "\[IndentingNewLine]", 
- RowBox[{
-  RowBox[{
-   RowBox[{"StationaryVector", "[", 
-    RowBox[{"matrix_", "?", "NormalizeRowsQ"}], "]"}], ":=", 
-   RowBox[{"StationaryVector", "[", 
-    RowBox[{"matrix", ",", " ", "1"}], "]"}]}], "\[IndentingNewLine]", 
-  "\[IndentingNewLine]", 
-  RowBox[{"(*", 
-   RowBox[{
    "compute", " ", "the", " ", "entropy", " ", "of", " ", "a", " ", 
     "stationary", " ", "vector", " ", "or", " ", "any", " ", "normalized", 
     " ", "vector"}], "*)"}]}], "\[IndentingNewLine]", 
  RowBox[{
-  RowBox[{
-   RowBox[{"ProcessEntropy", "[", 
-    RowBox[{"sv_", "?", "NormalizeVectorQ"}], "]"}], ":=", 
-   RowBox[{"-", 
-    RowBox[{"Total", "[", 
+  RowBox[{"EntropyRate", "[", 
+   RowBox[{"sv_", "?", "NormalizeVectorQ"}], "]"}], ":=", 
+  RowBox[{"-", 
+   RowBox[{"Total", "[", 
+    RowBox[{
      RowBox[{
+      RowBox[{"#", " ", 
+       RowBox[{"Log", "[", "#", "]"}]}], " ", "&"}], "/@", " ", 
+     RowBox[{"DeleteCases", "[", 
       RowBox[{
-       RowBox[{"#", " ", 
-        RowBox[{"Log", "[", "#", "]"}]}], " ", "&"}], "/@", " ", 
-      RowBox[{"DeleteCases", "[", 
-       RowBox[{
-        RowBox[{"Chop", "[", "sv", "]"}], ",", " ", "0", ",", " ", 
-        "Infinity"}], "]"}]}], "]"}]}]}], "\[IndentingNewLine]", 
-  "\[IndentingNewLine]", 
+       RowBox[{"Chop", "[", "sv", "]"}], ",", " ", "0", ",", " ", 
+       "Infinity"}], "]"}]}], "]"}]}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"EntropyRate", "[", 
+    RowBox[{"matrix_", "?", "NormalizeRowsQ"}], "]"}], ":=", 
+   RowBox[{"Block", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"i", ",", " ", "j", ",", " ", 
+       RowBox[{"sv", "=", 
+        RowBox[{"StationaryVector", "[", "matrix", "]"}]}]}], "}"}], ",", " ", 
+     RowBox[{"-", 
+      RowBox[{"Total", "[", 
+       RowBox[{"Total", "[", 
+        RowBox[{"Table", "[", 
+         RowBox[{
+          RowBox[{"If", "[", 
+           RowBox[{
+            RowBox[{
+             RowBox[{
+              RowBox[{"matrix", "[", 
+               RowBox[{"[", "i", "]"}], "]"}], "[", 
+              RowBox[{"[", "j", "]"}], "]"}], "===", "0"}], ",", " ", "0", 
+            ",", 
+            RowBox[{
+             RowBox[{"sv", "[", 
+              RowBox[{"[", "i", "]"}], "]"}], " ", 
+             RowBox[{
+              RowBox[{"matrix", "[", 
+               RowBox[{"[", "i", "]"}], "]"}], "[", 
+              RowBox[{"[", "j", "]"}], "]"}], " ", 
+             RowBox[{"Log", "[", 
+              RowBox[{
+               RowBox[{"matrix", "[", 
+                RowBox[{"[", "i", "]"}], "]"}], "[", 
+               RowBox[{"[", "j", "]"}], "]"}], "]"}]}]}], "]"}], ",", " ", 
+          RowBox[{"{", 
+           RowBox[{"i", ",", " ", "1", ",", " ", 
+            RowBox[{"Length", "[", "sv", "]"}]}], "}"}], ",", " ", 
+          RowBox[{"{", 
+           RowBox[{"j", ",", " ", "1", ",", " ", 
+            RowBox[{"Length", "[", 
+             RowBox[{"matrix", "[", 
+              RowBox[{"[", "i", "]"}], "]"}], "]"}]}], "}"}]}], "]"}], "]"}], 
+       "]"}]}]}], "]"}]}], "\[IndentingNewLine]", "\[IndentingNewLine]", 
   RowBox[{"(*", 
    RowBox[{
    "simplifies", " ", "an", " ", "expression", " ", "by", " ", "assuming", 
@@ -183,7 +201,7 @@ Cell[BoxData[{
       RowBox[{"(", 
        RowBox[{
         RowBox[{
-         RowBox[{"#", "\[Element]", "PositiveReals"}], "&"}], "/@", 
+         RowBox[{"#", ">=", "0"}], "&"}], "/@", 
         RowBox[{"(", 
          RowBox[{"Variables", "@", 
           RowBox[{"Level", "[", 
@@ -716,9 +734,15 @@ Cell[BoxData[{
    3.929785634328533*^9, 3.9297857201113443`*^9}, {3.9297858256894875`*^9, 
    3.9297858755708385`*^9}, {3.929785969141612*^9, 3.929786019063448*^9}, {
    3.9297860532334146`*^9, 3.9297860678476267`*^9}, {3.9297863821641617`*^9, 
-   3.9297864371663504`*^9}, {3.9297891237592115`*^9, 3.9297891965452223`*^9}},
+   3.9297864371663504`*^9}, {3.9297891237592115`*^9, 3.9297891965452223`*^9}, 
+   3.9312459926082325`*^9, {3.931246207123043*^9, 3.9312462071859713`*^9}, {
+   3.931246256511812*^9, 3.93124625706997*^9}, {3.9312466192630568`*^9, 
+   3.931246635697749*^9}, {3.93124666851801*^9, 3.931246740900381*^9}, {
+   3.931246795348732*^9, 3.93124681326495*^9}, {3.9312470905638556`*^9, 
+   3.9312471213658113`*^9}, {3.9312495584636993`*^9, 3.931249651295807*^9}, {
+   3.9312568449439445`*^9, 3.9312568650022197`*^9}},
  CellLabel->
-  "In[113]:=",ExpressionUUID->"4ce12d0b-7c19-4a15-868f-24bd60504db5"]
+  "In[1213]:=",ExpressionUUID->"4ce12d0b-7c19-4a15-868f-24bd60504db5"]
 },
 WindowSize->{1288.5, 960.75},
 WindowMargins->{{Automatic, -5.25}, {Automatic, 0}},
@@ -738,7 +762,7 @@ CellTagsIndex->{}
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[558, 20, 30433, 700, 1847, "Input",ExpressionUUID->"4ce12d0b-7c19-4a15-868f-24bd60504db5"]
+Cell[558, 20, 31560, 724, 1828, "Input",ExpressionUUID->"4ce12d0b-7c19-4a15-868f-24bd60504db5"]
 }
 ]
 *)
