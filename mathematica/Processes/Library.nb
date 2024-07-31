@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     32516,        761]
-NotebookOptionsPosition[     32122,        746]
-NotebookOutlinePosition[     32560,        763]
-CellTagsIndexPosition[     32517,        760]
+NotebookDataLength[     33440,        779]
+NotebookOptionsPosition[     33046,        764]
+NotebookOutlinePosition[     33484,        781]
+CellTagsIndexPosition[     33441,        778]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -131,62 +131,76 @@ Cell[BoxData[{
     "stationary", " ", "vector", " ", "or", " ", "any", " ", "normalized", 
     " ", "vector"}], "*)"}]}], "\[IndentingNewLine]", 
  RowBox[{
-  RowBox[{"EntropyRate", "[", 
-   RowBox[{"sv_", "?", "NormalizeVectorQ"}], "]"}], ":=", 
-  RowBox[{"-", 
-   RowBox[{"Total", "[", 
-    RowBox[{
-     RowBox[{
-      RowBox[{"#", " ", 
-       RowBox[{"Log", "[", "#", "]"}]}], " ", "&"}], "/@", " ", 
-     RowBox[{"DeleteCases", "[", 
-      RowBox[{
-       RowBox[{"Chop", "[", "sv", "]"}], ",", " ", "0", ",", " ", 
-       "Infinity"}], "]"}]}], "]"}]}]}], "\[IndentingNewLine]", 
- RowBox[{
   RowBox[{
-   RowBox[{"EntropyRate", "[", 
-    RowBox[{"matrix_", "?", "NormalizeRowsQ"}], "]"}], ":=", 
-   RowBox[{"Block", "[", 
-    RowBox[{
-     RowBox[{"{", 
-      RowBox[{"i", ",", " ", "j", ",", " ", 
-       RowBox[{"sv", "=", 
-        RowBox[{"StationaryVector", "[", "matrix", "]"}]}]}], "}"}], ",", " ", 
-     RowBox[{"-", 
-      RowBox[{"Total", "[", 
+   RowBox[{"EntropyProcess", "[", 
+    RowBox[{"sv_", "?", "NormalizeVectorQ"}], "]"}], ":=", 
+   RowBox[{"-", 
+    RowBox[{"Total", "[", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"#", " ", 
+        RowBox[{"Log", "[", "#", "]"}]}], " ", "&"}], "/@", " ", 
+      RowBox[{"DeleteCases", "[", 
+       RowBox[{
+        RowBox[{"Chop", "[", "sv", "]"}], ",", " ", "0", ",", " ", 
+        "Infinity"}], "]"}]}], "]"}]}]}], "\[IndentingNewLine]", 
+  RowBox[{"(*", 
+   RowBox[{
+    RowBox[{"EntropyRate", "[", 
+     RowBox[{"matrix_", "?", "NormalizeRowsQ"}], "]"}], ":=", 
+    RowBox[{"Block", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"i", ",", " ", "j", ",", " ", 
+        RowBox[{"sv", "=", 
+         RowBox[{"StationaryVector", "[", "matrix", "]"}]}]}], "}"}], ",", 
+      " ", 
+      RowBox[{"-", 
        RowBox[{"Total", "[", 
-        RowBox[{"Table", "[", 
-         RowBox[{
-          RowBox[{"If", "[", 
-           RowBox[{
+        RowBox[{"Total", "[", 
+         RowBox[{"Table", "[", 
+          RowBox[{
+           RowBox[{"If", "[", 
             RowBox[{
              RowBox[{
-              RowBox[{"matrix", "[", 
-               RowBox[{"[", "i", "]"}], "]"}], "[", 
-              RowBox[{"[", "j", "]"}], "]"}], "===", "0"}], ",", " ", "0", 
-            ",", 
-            RowBox[{
-             RowBox[{"sv", "[", 
-              RowBox[{"[", "i", "]"}], "]"}], " ", 
-             RowBox[{
-              RowBox[{"matrix", "[", 
-               RowBox[{"[", "i", "]"}], "]"}], "[", 
-              RowBox[{"[", "j", "]"}], "]"}], " ", 
-             RowBox[{"Log", "[", 
               RowBox[{
                RowBox[{"matrix", "[", 
                 RowBox[{"[", "i", "]"}], "]"}], "[", 
-               RowBox[{"[", "j", "]"}], "]"}], "]"}]}]}], "]"}], ",", " ", 
-          RowBox[{"{", 
-           RowBox[{"i", ",", " ", "1", ",", " ", 
-            RowBox[{"Length", "[", "sv", "]"}]}], "}"}], ",", " ", 
-          RowBox[{"{", 
-           RowBox[{"j", ",", " ", "1", ",", " ", 
-            RowBox[{"Length", "[", 
-             RowBox[{"matrix", "[", 
-              RowBox[{"[", "i", "]"}], "]"}], "]"}]}], "}"}]}], "]"}], "]"}], 
-       "]"}]}]}], "]"}]}], "\[IndentingNewLine]", "\[IndentingNewLine]", 
+               RowBox[{"[", "j", "]"}], "]"}], "===", "0"}], ",", " ", "0", 
+             ",", 
+             RowBox[{
+              RowBox[{"sv", "[", 
+               RowBox[{"[", "i", "]"}], "]"}], " ", 
+              RowBox[{
+               RowBox[{"matrix", "[", 
+                RowBox[{"[", "i", "]"}], "]"}], "[", 
+               RowBox[{"[", "j", "]"}], "]"}], " ", 
+              RowBox[{"Log", "[", 
+               RowBox[{
+                RowBox[{"matrix", "[", 
+                 RowBox[{"[", "i", "]"}], "]"}], "[", 
+                RowBox[{"[", "j", "]"}], "]"}], "]"}]}]}], "]"}], ",", " ", 
+           RowBox[{"{", 
+            RowBox[{"i", ",", " ", "1", ",", " ", 
+             RowBox[{"Length", "[", "sv", "]"}]}], "}"}], ",", " ", 
+           RowBox[{"{", 
+            RowBox[{"j", ",", " ", "1", ",", " ", 
+             RowBox[{"Length", "[", 
+              RowBox[{"matrix", "[", 
+               RowBox[{"[", "i", "]"}], "]"}], "]"}]}], "}"}]}], "]"}], "]"}],
+         "]"}]}]}], "]"}]}], "*)"}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"RunningProbabilities", "[", 
+    RowBox[{
+     RowBox[{"matrix_", "?", "NormalizeRowsQ"}], ",", " ", 
+     RowBox[{"initialVector_", "?", "NormalizeVectorQ"}]}], "]"}], ":=", 
+   RowBox[{"Function", "[", 
+    RowBox[{"n", ",", " ", 
+     RowBox[{"initialVector", ".", 
+      RowBox[{"MatrixPower", "[", 
+       RowBox[{"matrix", ",", " ", "n"}], "]"}]}]}], "]"}]}], 
+  "\[IndentingNewLine]", "\[IndentingNewLine]", "\[IndentingNewLine]", 
   RowBox[{"(*", 
    RowBox[{
    "simplifies", " ", "an", " ", "expression", " ", "by", " ", "assuming", 
@@ -740,9 +754,13 @@ Cell[BoxData[{
    3.931246635697749*^9}, {3.93124666851801*^9, 3.931246740900381*^9}, {
    3.931246795348732*^9, 3.93124681326495*^9}, {3.9312470905638556`*^9, 
    3.9312471213658113`*^9}, {3.9312495584636993`*^9, 3.931249651295807*^9}, {
-   3.9312568449439445`*^9, 3.9312568650022197`*^9}},
- CellLabel->
-  "In[1213]:=",ExpressionUUID->"4ce12d0b-7c19-4a15-868f-24bd60504db5"]
+   3.9312568449439445`*^9, 3.9312568650022197`*^9}, {3.9313242529310856`*^9, 
+   3.9313243033032627`*^9}, {3.931324471518957*^9, 3.9313244817427554`*^9}, {
+   3.9313245312390776`*^9, 3.9313245872799187`*^9}, 3.9313246600248356`*^9, {
+   3.9313247069485703`*^9, 3.9313247132676983`*^9}, {3.9313248048312254`*^9, 
+   3.9313248179749327`*^9}, {3.931324955832293*^9, 3.931325019867286*^9}, {
+   3.9313250833675537`*^9, 3.9313250881508904`*^9}},
+ CellLabel->"In[5]:=",ExpressionUUID->"4ce12d0b-7c19-4a15-868f-24bd60504db5"]
 },
 WindowSize->{1288.5, 960.75},
 WindowMargins->{{Automatic, -5.25}, {Automatic, 0}},
@@ -762,7 +780,7 @@ CellTagsIndex->{}
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[558, 20, 31560, 724, 1828, "Input",ExpressionUUID->"4ce12d0b-7c19-4a15-868f-24bd60504db5"]
+Cell[558, 20, 32484, 742, 1866, "Input",ExpressionUUID->"4ce12d0b-7c19-4a15-868f-24bd60504db5"]
 }
 ]
 *)
