@@ -10,5 +10,5 @@ pip install numpy
 pip install opencv-python
 pip install matplotlib
 pip install astropy
-pip install pyqt5
+pip install pyqt6
 ```

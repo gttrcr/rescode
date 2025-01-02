@@ -1,4 +1,3 @@
-# Print iterations progress
 def print_progress_bar(
     iteration,
     total,

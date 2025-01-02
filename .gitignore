@@ -23,4 +23,5 @@
 *.JPG
 *.avi
 *.AVI
+*.mp4
 __pycache__
