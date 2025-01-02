@@ -1,8 +1,4 @@
-﻿################################################################################
-# Il file gitignore è stato creato automaticamente da Microsoft(R) Visual Studio.
-################################################################################
-
-/OEIS/obj
+﻿/OEIS/obj
 /.vs/ResearchCode/v16
 /OEIS/bin/Debug
 /OEIS/bin/Release
@@ -20,3 +16,11 @@
 *.user
 /MMGs/bin
 /MMGs/obj
+*/env/*
+*.fit
+*.FIT
+*.jpg
+*.JPG
+*.avi
+*.AVI
+__pycache__
