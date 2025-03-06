@@ -9,36 +9,64 @@ import numpy as np
 
 matplotlib.use("qtagg")
 import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
 from astropy.io import fits
 from os.path import join
 from utils import print_progress_bar
 
-folder = "./"
-video_name = "ball.mp4"
+folder = "orion"
+video_name = f"{folder.split('/')[0]}.mp4"
 
 folder = os.path.abspath(folder)
 video_name = join(folder, video_name)
 norm_folder = join(os.path.abspath(folder), "norm")
 
 
-def normalize_picture(filename):
-    hdul = fits.open(filename)
-    image_data = hdul[0].data
-    hdul.close()
-    cmap = matplotlib.cm.flag
-    norm = matplotlib.colors.PowerNorm(
-        gamma=0.5,
-        vmin=np.min(image_data),
-        vmax=np.max(image_data),
-    )
-    image_data = cmap(norm(image_data))
-    return image_data
-
-
 def process(path):
-    img = normalize_picture(path)
+
+    def normalize_image(image, alpha=0, beta=255):
+        normalized_image = np.zeros(image.shape, dtype=np.float32)
+        cv2.normalize(
+            image,
+            normalized_image,
+            alpha=alpha,
+            beta=beta,
+            norm_type=cv2.norm_,
+            dtype=cv2.CV_32F,
+        )
+        return normalized_image
+
+    def process_jpg(input_path):
+        image = cv2.imread(input_path, cv2.IMREAD_COLOR)
+        if image is None:
+            print(f"Error: Unable to read JPG image at {input_path}")
+            return
+
+        normalized_image = normalize_image(image)
+        # normalized_image = cv2.convertScaleAbs(normalized_image)
+        return normalized_image
+
+    def process_fits(input_path):
+        with fits.open(input_path) as hdul:
+            fits_data = hdul[0].data
+            fits_header = hdul[0].header
+
+        if fits_data is None:
+            print(f"Error: No data found in FITS file at {input_path}")
+            return
+
+        fits_data_normalized = normalize_image(fits_data, alpha=0, beta=255)
+        # fits_data_normalized = cv2.convertScaleAbs(fits_data_normalized)
+        return fits_data_normalized
+
+    _, ext = os.path.splitext(path)
+    if ext.lower().startswith(".jpg"):
+        img = process_jpg(path)
+    elif ext.lower().startswith(".fit"):
+        img = process_fits(path)
+
     path = join(norm_folder, f"{os.path.splitext(os.path.basename(path))[0]}.jpg")
-    plt.imsave(path, img)
+    cv2.imwrite(path, img)
     return img
 
 
@@ -136,7 +164,7 @@ if __name__ == "__main__":
     imgs = [
         os.path.abspath(join(folder, img))
         for img in os.listdir(folder)
-        if img.lower().endswith(".fit")
+        if img.lower().endswith((".jpg", ".fit", ".fits"))
     ]
 
     if imgs:
